@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<robot name="vehicle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="vehicle_physics" params="name">
+
+    <!-- BASE_LINK -->
+    <link name="base_link">
+
+      <inertial>
+        <mass value="208.0" />
+        <origin xyz="0 0 0" />
+        <inertia  ixx="1.391" ixy="0.004"  ixz="0.0"  iyy="6.853"  iyz="0.0"  izz="93.0" />
+      </inertial>
+      
+      <visual>
+        <origin xyz="0.8 0 -0.2" rpy="0 0 0" />
+          <geometry>
+            <mesh filename="package://sim_vehicle/meshes/vehicle.dae"/>
+          </geometry>
+      </visual>
+      
+      <collision>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <geometry>
+          <box size="1 1 1" />
+        </geometry>
+      </collision>
+    
+    </link>
+
+  </xacro:macro>
+</robot>

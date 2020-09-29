@@ -1,0 +1,48 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='ground_plane'>
+    <static>1</static>
+    <link name='link'>
+      <collision name='collision'>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>300 300</size>
+          </plane>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.6</mu> <!-- Ideal conditions would be 1.8, normal 1.2, maximum obtained 1.6 -->
+            </ode>
+            <torsional>
+              <ode/>
+            </torsional>
+          </friction>
+          <contact>
+            <ode/>
+          </contact>
+          <bounce/>
+        </surface>
+        <max_contacts>10</max_contacts>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>3000 3000</size>
+          </plane>
+        </geometry>
+      </visual>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+      <gravity>1</gravity>
+    </link>
+
+    <joint name="link_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />  
+      <parent link="base_link"/>
+      <child link="link" />
+    </joint>
+  </model>
+</sdf>
