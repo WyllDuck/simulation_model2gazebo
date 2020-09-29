@@ -1,0 +1,2 @@
+# drone-simulation
+This simulation works using Gazebo and ROS. The aim is to create a framework with which to implement different vehicles easily, to start the a drone will be implemented. The simulation of their physics will be executed on a C++ node which communicates with Gazebo the new state of the vehicle. To top it off, sensors like cameras, lidars, ultra sound and more can be added using the classical URDF sensor plugins. 
