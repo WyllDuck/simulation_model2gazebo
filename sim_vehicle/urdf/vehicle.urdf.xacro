@@ -13,7 +13,5 @@
     <!-- *************** -->
     <!--  MAIN SENSORS   -->
     <!-- *************** -->
-
-    <xacro:gazebo_INS_devices />
-
+    
 </robot>

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="gazebo_INS_devices">
+    <xacro:macro name="model2gazebo">
         <gazebo>
-            <plugin filename="libgazebo_INS_devices.so" name="gazebo_INS_devices">
-                <node_name>gazebo_ins_devices</node_name>
+            <plugin filename="libmodel2gazebo.so" name="model2gazebo">
+                <node_name>model2gazebo</node_name>
                 <rate>100</rate>                
             </plugin>
         </gazebo>

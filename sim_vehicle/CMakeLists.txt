@@ -15,9 +15,9 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 catkin_package()
 
-add_library(gazebo_INS_devices SHARED src/gazebo_INS_devices.cpp)
+add_library(model2gazebo SHARED src/model2gazebo.cpp include/model2gazebo.hh)
 
-target_link_libraries(gazebo_INS_devices ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} )
+target_link_libraries(model2gazebo ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} )
 
 install(DIRECTORY include/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
@@ -25,7 +25,7 @@ install(DIRECTORY include/
 )
 
 install(TARGETS
-  gazebo_INS_devices
+  model2gazebo
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
