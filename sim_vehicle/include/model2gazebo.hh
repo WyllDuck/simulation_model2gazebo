@@ -75,6 +75,8 @@ namespace gazebo
 
         void PublishStateTruth();
 
+        void GetRotationMatrix(Eigen::Matrix3d &R_);
+
         Eigen::VectorXd gaz_ace, gaz_vel, gaz_pos;
         Eigen::VectorXd new_ace, new_vel, new_pos;
 

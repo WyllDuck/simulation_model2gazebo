@@ -191,9 +191,13 @@ void ModelToGazebo::SetState()
 void ModelToGazebo::GetState()
 {
 
-    // Position: x, y, z, roll, pitch, yaw
+    /* ----------------------------------
+            Reference Frame Global 
+    ---------------------------------- */
+    // position (x, y, z, roll, pitch, yaw)
     math::Pose3d global_pos_gaz = this->model->WorldPose();
 
+    // mini append information
     gaz_pos[0] = global_pos_gaz.Pos()[0];
     gaz_pos[1] = global_pos_gaz.Pos()[1];
     gaz_pos[2] = global_pos_gaz.Pos()[2];
@@ -202,50 +206,38 @@ void ModelToGazebo::GetState()
     gaz_pos[4] = global_pos_gaz.Rot().Pitch();
     gaz_pos[5] = global_pos_gaz.Rot().Yaw();
 
-    // Velocity: vx, vy, vz + angular
-    // Reference Frame Local (Vehicle)
-
+    // velocity
     math::Vector3d lin_vel_gaz = this->model->WorldLinearVel();
     math::Vector3d ang_vel_gaz = this->model->WorldAngularVel();
+
+    // acceleration
     math::Vector3d lin_accel_gaz = this->model->WorldLinearAccel();
     math::Vector3d ang_accel_gaz = this->model->WorldAngularAccel();
 
-    // Transformation Tools
-    Eigen::Matrix3d matrix;
+    /* ----------------------------------
+        Reference Frame Local (Vehicle) 
+    ---------------------------------- */
+    // transformation tools
+    Eigen::Matrix3d R;
+    GetRotationMatrix(R);
 
-    Eigen::Vector3d lin_global_velocity, ang_global_velocity;
-    Eigen::Vector3d lin_local_velocity, ang_local_velocity;
-    Eigen::Vector3d lin_global_acceleration, ang_global_acceleration;
-    Eigen::Vector3d lin_local_acceleration, ang_local_acceleration;
+    // velocity
+    Eigen::Vector3d lin_global_velocity(lin_vel_gaz[0], lin_vel_gaz[1], lin_vel_gaz[2]);
+    Eigen::Vector3d lin_local_velocity = R * lin_global_velocity;
 
-    // Unity Rotational Vector
-    double l = 0; // x
-    double m = 0; // y
-    double n = 1; // z
+    Eigen::Vector3d ang_global_velocity(ang_vel_gaz[0], ang_vel_gaz[1], ang_vel_gaz[2]);
+    Eigen::Vector3d ang_local_velocity = R * ang_global_velocity;
 
-    double inv_cos = 1 - cos(-gaz_pos[5]); // SIGN CHANGE
-    double nor_cos = cos(-gaz_pos[5]);     // SIGN CHANGE
-    double nor_sin = sin(-gaz_pos[5]);     // SIGN CHANGE
+    // acceleration
+    Eigen::Vector3d lin_global_acceleration(lin_accel_gaz[0], lin_accel_gaz[1], lin_accel_gaz[2]);
+    Eigen::Vector3d lin_local_acceleration = R * lin_global_acceleration;
 
-    // Rotation matrix to transform global to local velocities and accelerations. Angle of rotation --> -Yaw
-    matrix << l * l * inv_cos + nor_cos, m * l * inv_cos - n * nor_sin, n * l * inv_cos + m * nor_sin,
-        l * m * inv_cos + n * nor_sin, m * m * inv_cos + nor_cos, n * m * inv_cos - l * nor_sin,
-        l * n * inv_cos - m * nor_sin, m * n * inv_cos + l * nor_sin, n * n * inv_cos + nor_cos;
+    Eigen::Vector3d ang_global_acceleration(ang_accel_gaz[0], ang_accel_gaz[1], ang_accel_gaz[2]);
+    Eigen::Vector3d ang_local_acceleration = R * ang_global_acceleration;
 
-    // Global => Local
-    lin_global_velocity << lin_vel_gaz[0], lin_vel_gaz[1], lin_vel_gaz[2];
-    lin_local_velocity = matrix * lin_global_velocity;
-
-    ang_global_velocity << ang_vel_gaz[0], ang_vel_gaz[1], ang_vel_gaz[2];
-    ang_local_velocity = matrix * ang_global_velocity;
-
-    lin_global_acceleration << lin_accel_gaz[0], lin_accel_gaz[1], lin_accel_gaz[2];
-    lin_local_acceleration = matrix * lin_global_acceleration;
-
-    ang_global_acceleration << ang_accel_gaz[0], ang_accel_gaz[1], ang_accel_gaz[2];
-    ang_local_acceleration = matrix * ang_global_acceleration;
-
-    // Append Information
+    /* ----------------------------------
+        Append Information 
+    ---------------------------------- */
     gaz_ace[0] = lin_local_acceleration[0];
     gaz_ace[1] = lin_local_acceleration[1];
     gaz_ace[2] = lin_local_acceleration[2];
@@ -263,4 +255,24 @@ void ModelToGazebo::GetState()
     gaz_vel[5] = ang_local_velocity[2];
 }
 
-GZ_REGISTER_MODELPLUGIN(ModelToGazebo)
+/* ------------------------
+    AUXILIARY FUNCTIONS
+------------------------ */
+
+void ModelToGazebo::GetRotationMatrix(Eigen::Matrix3d &R_)
+{
+
+    double c0 = cos(gaz_pos[3]);
+    double c1 = cos(gaz_pos[4]);
+    double c2 = cos(gaz_pos[5]);
+
+    double s0 = sin(gaz_pos[3]);
+    double s1 = sin(gaz_pos[4]);
+    double s2 = sin(gaz_pos[5]);
+
+    R_ << c0 * c2 - c1 * s0 * s2, -c2 * s0 - c0 * c1 * s2, s1 * s2,
+        c1 * c2 * s0 + c0 * s2, c0 * c1 * c2 - s0 * s2, -c2 * s1,
+        s0 * s1, c0 * s1, c1;
+}
+
+GZ_REGISTER_MODEL_PLUGIN(ModelToGazebo)

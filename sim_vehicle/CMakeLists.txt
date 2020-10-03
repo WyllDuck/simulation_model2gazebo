@@ -15,7 +15,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 catkin_package()
 
-add_library(model2gazebo SHARED src/model2gazebo.cpp include/model2gazebo.hh)
+add_library(model2gazebo SHARED src/model2gazebo.cpp)
 
 target_link_libraries(model2gazebo ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} )
 
