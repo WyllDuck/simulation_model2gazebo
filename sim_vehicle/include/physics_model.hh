@@ -21,29 +21,40 @@
  * SOFTWARE.
  */
 
-#ifndef DRONE_HH
-#define DRONE_HH
+#ifndef PHYSICS_MODEL_HH
+#define PHYSICS_MODEL_HH
+
+// ROS
+#include <ros/ros.h>
 
 // Includes
-#include <physics_model.hh>
+#include <eigen3/Eigen/Dense>
+#include <math.h>
+#include <chrono>
 
-class DronePhysicsModel : public PhysicsModel
+// Gazebo
+#include <functional>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/common.hh>
+
+class PhysicsModel
 {
 
 public:
-    DronePhysicsModel();
+    PhysicsModel();
 
-    ~DronePhysicsModel();
+    ~PhysicsModel();
 
-    void Run(Eigen::VectorXd &_inputs, Eigen::VectorXd &fut_ace_);
+    virtual void Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &nh);
 
-    void Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &nh);
+    virtual void Run(const Eigen::VectorXd &_inputs, Eigen::VectorXd &fut_ace_);
 
     void UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos);
 
-    void GetTransformtionMatrices();
-
     gazebo::physics::ModelPtr model;
+
+    void GetTransformtionMatrices();
 
     Eigen::VectorXd cur_pos, cur_ace, cur_vel;
     Eigen::VectorXd fut_pos, fut_ace, fut_vel;
@@ -51,23 +62,6 @@ public:
     Eigen::Matrix3d R_Global2Local, R_Local2Global;
 
     boost::shared_ptr<ros::NodeHandle> nh;
-
-private:
-    double m, L;
-
-    Eigen::Vector3d gravity;
-
-    Eigen::Matrix3d I, kd;
-
-    double k, b;
-
-    void Thrust(Eigen::VectorXd &_inputs, Eigen::Vector3d &T_);
-
-    void Torques(Eigen::VectorXd &_inputs, Eigen::Vector3d &tau_);
-
-    void Acceleration(Eigen::VectorXd &_inputs, Eigen::Vector3d &a_);
-
-    void AngularAcceleration(Eigen::VectorXd &_inputs, Eigen::Vector3d &omegadot_);
 };
 
-#endif // DRONE_HH
+#endif // PHYSICS_MODEL_HH

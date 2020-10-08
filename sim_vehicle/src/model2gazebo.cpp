@@ -41,6 +41,9 @@ ModelToGazebo::ModelToGazebo() : ModelPlugin()
     new_ace.resize(6);
     new_vel.resize(6);
     new_pos.resize(6);
+
+    // Inputs
+    inputs.resize(4);
 }
 
 ModelToGazebo::~ModelToGazebo()
@@ -80,6 +83,9 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&ModelToGazebo::Update, this));
 
     dt_required = 1.0 / _sdf->Get<double>("rate");
+
+    drone = DronePhysicsModel();
+    drone.Init(_parent, _sdf, this->nh);
 }
 
 void ModelToGazebo::Update()
@@ -99,7 +105,14 @@ void ModelToGazebo::Update()
     /*START*/
     GetState();
     PublishStateTruth();
+
+    // Load new state in PhysicsModel attributes.
+    drone.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
+
+    // Find Next State
+    drone.Run(inputs, new_ace);
     UpdateModel(dt);
+
     SetState();
     /*END*/
 
@@ -219,7 +232,7 @@ void ModelToGazebo::GetState()
     ---------------------------------- */
     // transformation tools
     Eigen::Matrix3d R;
-    GetRotationMatrix(R);
+    GetGlobal2LocalMatrix(R);
 
     // velocity
     Eigen::Vector3d lin_global_velocity(lin_vel_gaz[0], lin_vel_gaz[1], lin_vel_gaz[2]);
@@ -259,7 +272,7 @@ void ModelToGazebo::GetState()
     AUXILIARY FUNCTIONS
 ------------------------ */
 
-void ModelToGazebo::GetRotationMatrix(Eigen::Matrix3d &R_)
+void ModelToGazebo::GetGlobal2LocalMatrix(Eigen::Matrix3d &R_)
 {
 
     double c0 = cos(gaz_pos[3]);
@@ -270,9 +283,9 @@ void ModelToGazebo::GetRotationMatrix(Eigen::Matrix3d &R_)
     double s1 = sin(gaz_pos[4]);
     double s2 = sin(gaz_pos[5]);
 
-    R_ << c0 * c2 - c1 * s0 * s2, -c2 * s0 - c0 * c1 * s2, s1 * s2,
-        c1 * c2 * s0 + c0 * s2, c0 * c1 * c2 - s0 * s2, -c2 * s1,
-        s0 * s1, c0 * s1, c1;
+    R_ << c0 * c1, c0 * s1 * s2 - s0 * c2, c0 * s1 * s2 + s0 * s2,
+        s0 * c1, s0 * s1 * s2 + c0 * c2, s0 * s1 * c2 - c0 * s2,
+        -s1, c1 * s2, c1 * c2;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(ModelToGazebo)

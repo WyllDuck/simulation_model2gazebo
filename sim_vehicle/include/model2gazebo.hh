@@ -48,6 +48,9 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
+// PhysicsModel Simulation
+#include <drone_model.hh>
+
 namespace gazebo
 {
 
@@ -64,6 +67,9 @@ namespace gazebo
         void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
     private:
+
+        DronePhysicsModel drone;
+
         void Update();
 
         bool isLoopTime(const common::Time &time, double &dt);
@@ -75,10 +81,12 @@ namespace gazebo
 
         void PublishStateTruth();
 
-        void GetRotationMatrix(Eigen::Matrix3d &R_);
+        void GetGlobal2LocalMatrix(Eigen::Matrix3d &R_);
 
         Eigen::VectorXd gaz_ace, gaz_vel, gaz_pos;
         Eigen::VectorXd new_ace, new_vel, new_pos;
+
+        Eigen::VectorXd inputs;
 
         ros::Publisher pub_state_truth_ace;
         ros::Publisher pub_state_truth_vel;
