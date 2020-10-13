@@ -16,7 +16,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 catkin_package()
 
 add_library(model2gazebo SHARED include/physics_model.hh 
-                          		  include/drone_model.hh
+                          		include/drone_model.hh
                                 include/model2gazebo.hh
 
                                 src/physics_model.cpp
