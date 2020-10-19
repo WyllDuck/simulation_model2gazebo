@@ -48,13 +48,13 @@ void DronePhysicsModel::Run(VectorXd &_inputs, VectorXd &fut_ace_)
     AngularAcceleration(_inputs, omegadot);
 
     // Append values for model2gazebo
-    fut_ace_[0] = a[0];
-    fut_ace_[1] = a[1];
-    fut_ace_[2] = a[2];
+    fut_ace_[0] = 0.1;
+    fut_ace_[1] = 0.0;
+    fut_ace_[2] = 0.0;
 
-    fut_ace_[3] = omegadot[0];
-    fut_ace_[4] = omegadot[1];
-    fut_ace_[5] = omegadot[2];
+    fut_ace_[3] = 0.0;
+    fut_ace_[4] = 0.0;
+    fut_ace_[5] = 0.0;
 }
 
 /* ------------------------

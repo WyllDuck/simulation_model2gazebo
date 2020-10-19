@@ -1,38 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sim_vehicle)
 
-add_compile_options(-std=c++11)
-
-find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs tf)
-find_package(Eigen3 REQUIRED)
-find_package(gazebo REQUIRED)
-
-include_directories(include ${catkin_INCLUDE_DIRS})
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
-include_directories(${GAZEBO_INCLUDE_DIRS})
-link_directories(${GAZEBO_LIBRARY_DIRS})
+find_package(catkin REQUIRED COMPONENTS)
 
 catkin_package()
-
-add_library(model2gazebo SHARED include/physics_model.hh 
-                          		include/drone_model.hh
-                                include/model2gazebo.hh
-
-                                src/physics_model.cpp
-                                src/drone_model.cpp
-                                src/model2gazebo.cpp)
-
-target_link_libraries(model2gazebo ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} )
-
-install(DIRECTORY include/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.hh"
-)
-
-install(TARGETS
-  model2gazebo
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)

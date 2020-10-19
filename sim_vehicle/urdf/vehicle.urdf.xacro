@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <robot name="vehicle" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- IMPORTS -->
     <xacro:include filename="$(find sim_vehicle)/sensors/sensors.urdf.xacro" />
 
     <!-- ***************** -->
     <!--  VEHICLE PHYSICS  -->
     <!-- ***************** -->
 
-    <!-- BASE_LINK -->
+    <!-- BASE LINK -->
     <link name="base_link">
 
         <inertial>
@@ -30,14 +31,15 @@
             </geometry>
         </collision>
 
-        <gazebo>
-            <plugin filename="libmodel2gazebo.so" name="model2gazebo">
-                <node_name>model2gazebo</node_name>
-                <rate>100</rate>
-            </plugin>
-        </gazebo>
-
     </link>
+
+    <!-- PHYSICS PLUGIN -->
+    <gazebo>
+        <plugin filename="libmodel2gazebo.so" name="model2gazebo">
+            <node_name>model2gazebo</node_name>
+            <rate>100</rate>
+        </plugin>
+    </gazebo>
 
     <!-- *************** -->
     <!--  MAIN SENSORS   -->
