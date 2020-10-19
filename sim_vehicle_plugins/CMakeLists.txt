@@ -3,7 +3,7 @@ project(sim_vehicle_plugins)
 
 add_compile_options(-std=c++11)
 
-find_package(catkin REQUIRED COMPONENTS gazebo_ros roscpp geometry_msgs sensor_msgs nav_msgs message_filters sbg_driver dv_msgs tf)
+find_package(catkin REQUIRED COMPONENTS gazebo_ros roscpp geometry_msgs tf)
 find_package(Eigen3 REQUIRED)
 find_package(gazebo REQUIRED)
 
