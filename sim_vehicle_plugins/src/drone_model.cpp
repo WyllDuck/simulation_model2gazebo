@@ -37,7 +37,52 @@ DronePhysicsModel::~DronePhysicsModel()
 {
 }
 
-using namespace Eigen;
+/* ------------------------
+      BASIC FUNCTIONS
+------------------------ */
+
+void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &_nh)
+{
+    // Save Model
+    this->model = _parent;
+    
+    // Current State Vectors
+    this->cur_ace.resize(6);
+    this->cur_vel.resize(6);
+    this->cur_pos.resize(6);
+
+    // Future State Vectors
+    this->fut_ace.resize(6);
+    this->fut_vel.resize(6);
+    this->fut_pos.resize(6);
+
+    this->nh = _nh;
+}
+
+void DronePhysicsModel::UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos)
+{
+    this->cur_ace = _cur_ace;
+    this->cur_vel = _cur_vel;
+    this->cur_pos = _cur_pos;
+}
+
+void DronePhysicsModel::GetTransformtionMatrices()
+{
+    double c0 = cos(cur_pos[3]);
+    double c1 = cos(cur_pos[4]);
+    double c2 = cos(cur_pos[5]);
+
+    double s0 = sin(cur_pos[3]);
+    double s1 = sin(cur_pos[4]);
+    double s2 = sin(cur_pos[5]);
+
+    R_Global2Local << c0 * c1, c0 * s1 * s2 - s0 * c2, c0 * s1 * s2 + s0 * s2,
+        s0 * c1, s0 * s1 * s2 + c0 * c2, s0 * s1 * c2 - c0 * s2,
+        -s1, c1 * s2, c1 * c2;
+
+    R_Local2Global = R_Global2Local.inverse();
+    
+}
 
 void DronePhysicsModel::Run(VectorXd &_inputs, VectorXd &fut_ace_)
 {
@@ -48,12 +93,12 @@ void DronePhysicsModel::Run(VectorXd &_inputs, VectorXd &fut_ace_)
     AngularAcceleration(_inputs, omegadot);
 
     // Append values for model2gazebo
-    fut_ace_[0] = 0.1;
-    fut_ace_[1] = 0.0;
+    fut_ace_[0] = 10;
+    fut_ace_[1] = 10;
     fut_ace_[2] = 0.0;
 
     fut_ace_[3] = 0.0;
-    fut_ace_[4] = 0.0;
+    fut_ace_[4] = 1.0;
     fut_ace_[5] = 0.0;
 }
 

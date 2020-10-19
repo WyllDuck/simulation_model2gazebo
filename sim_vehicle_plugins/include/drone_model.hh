@@ -24,10 +24,21 @@
 #ifndef DRONE_HH
 #define DRONE_HH
 
-// Includes
-#include <physics_model.hh>
+// ROS
+#include <ros/ros.h>
 
-class DronePhysicsModel : public PhysicsModel
+// Includes
+#include <eigen3/Eigen/Dense>
+#include <math.h>
+#include <chrono>
+
+// Gazebo
+#include <functional>
+#include <gazebo/gazebo.hh>
+#include <gazebo/physics/physics.hh>
+#include <gazebo/common/common.hh>
+
+class DronePhysicsModel
 {
 
 public:

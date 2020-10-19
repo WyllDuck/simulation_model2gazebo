@@ -84,33 +84,8 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     dt_required = 1.0 / _sdf->Get<double>("rate");
 
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    
-    std::cout << 1 << std::endl;
-    
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-
-
-    //drone = DronePhysicsModel();
-    //drone.Init(_parent, _sdf, this->nh);
+    drone = DronePhysicsModel();
+    drone.Init(_parent, _sdf, this->nh);
 }
 
 void ModelToGazebo::Update()
@@ -132,10 +107,10 @@ void ModelToGazebo::Update()
     PublishStateTruth();
 
     // Load new state in PhysicsModel attributes.
-    //drone.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
+    drone.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
 
     // Find Next State
-    //drone.Run(inputs, new_ace);
+    drone.Run(inputs, new_ace);
     UpdateModel(dt);
 
     SetState();
@@ -165,13 +140,12 @@ bool ModelToGazebo::isLoopTime(const common::Time &time, double &dt)
 
 void ModelToGazebo::UpdateModel(const double &dt)
 {
-    //new_ace = new_ace;
+
     new_vel = gaz_vel + dt * new_ace;
 
     std::cout << new_ace << std::endl;
     std::cout << new_vel << std::endl;
     std::cout << new_pos << std::endl;
-
 
     new_pos = gaz_pos + dt * new_vel;
 }

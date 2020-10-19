@@ -49,7 +49,7 @@
 #include <gazebo/common/common.hh>
 
 // PhysicsModel Simulation
-//#include <drone_model.hh>
+#include <drone_model.hh>
 
 namespace gazebo
 {
@@ -68,7 +68,7 @@ namespace gazebo
 
     private:
 
-        //DronePhysicsModel drone;
+        DronePhysicsModel drone;
 
         void Update();
 
