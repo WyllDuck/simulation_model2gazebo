@@ -50,6 +50,7 @@
 
 // PhysicsModel Simulation
 #include <drone_model.hh>
+#include <inputs.hh>
 
 namespace gazebo
 {
@@ -67,8 +68,9 @@ namespace gazebo
         void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
     private:
+        Inputs ros_inputs;
 
-        DronePhysicsModel drone;
+        DronePhysicsModel vehicle_model;
 
         void Update();
 
@@ -85,8 +87,6 @@ namespace gazebo
 
         Eigen::VectorXd gaz_ace, gaz_vel, gaz_pos;
         Eigen::VectorXd new_ace, new_vel, new_pos;
-
-        Eigen::VectorXd inputs;
 
         ros::Publisher pub_state_truth_ace;
         ros::Publisher pub_state_truth_vel;

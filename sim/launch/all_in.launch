@@ -1,0 +1,8 @@
+<launch>
+
+    <include file="$(find sim_world)/launch/template.launch"></include>
+
+    <node pkg="sim" type="keyboard_control.py" name="keyboard_control" output="screen">
+    </node>
+
+</launch>

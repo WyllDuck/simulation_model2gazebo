@@ -42,8 +42,6 @@ ModelToGazebo::ModelToGazebo() : ModelPlugin()
     new_vel.resize(6);
     new_pos.resize(6);
 
-    // Inputs
-    inputs.resize(4);
 }
 
 ModelToGazebo::~ModelToGazebo()
@@ -84,8 +82,12 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     dt_required = 1.0 / _sdf->Get<double>("rate");
 
-    drone = DronePhysicsModel();
-    drone.Init(_parent, _sdf, this->nh);
+    vehicle_model = DronePhysicsModel();
+    vehicle_model.Init(_parent, _sdf, this->nh);
+    
+    ros_inputs = Inputs();
+    ros_inputs.Init(this->nh);
+    
 }
 
 void ModelToGazebo::Update()
@@ -107,10 +109,10 @@ void ModelToGazebo::Update()
     PublishStateTruth();
 
     // Load new state in PhysicsModel attributes.
-    drone.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
+    vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
 
     // Find Next State
-    drone.Run(inputs, new_ace);
+    vehicle_model.Run(ros_inputs.inputs, new_ace);
     UpdateModel(dt);
 
     SetState();

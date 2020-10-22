@@ -3,7 +3,7 @@ project(sim_vehicle_plugins)
 
 add_compile_options(-std=c++11)
 
-find_package(catkin REQUIRED COMPONENTS gazebo_ros roscpp geometry_msgs tf)
+find_package(catkin REQUIRED COMPONENTS gazebo_ros roscpp geometry_msgs std_msgs tf)
 find_package(Eigen3 REQUIRED)
 find_package(gazebo REQUIRED)
 
@@ -16,7 +16,8 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 catkin_package()
 
 add_library(model2gazebo SHARED src/model2gazebo.cpp
-								src/drone_model.cpp)
+								src/drone_model.cpp
+								include/inputs.hh)
 
 target_link_libraries(model2gazebo ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} )
 
