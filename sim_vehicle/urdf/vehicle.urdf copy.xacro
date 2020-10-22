@@ -2,7 +2,7 @@
 <robot name="vehicle" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- CONFIGURATION FILE (YAML) -->
-    <xacro:property name="params" value="${load_yaml('$(arg params)')}"/>
+    <xacro:property name="robot_sensors" value="${load_yaml('$(arg params)')}"/>
 
     <!-- IMPORTS -->
     <xacro:include filename="$(find sim_vehicle)/sensors/sensors.urdf.xacro" />
@@ -30,7 +30,7 @@
         </visual>
 
         <collision>
-            <origin xyz="0 0.5 0" rpy="0 0 0" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
                 <box size="1 1 1" />
             </geometry>

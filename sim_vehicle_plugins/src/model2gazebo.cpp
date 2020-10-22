@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Authors:
+ * Copyright (c) 2020 Authors:
  *   - Félix Martí Valverde <martivalverde@hotmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +32,7 @@ using namespace ignition;
 
 ModelToGazebo::ModelToGazebo() : ModelPlugin()
 {
+
     // Gazebo State Vectors
     gaz_ace.resize(6);
     gaz_ace.setZero();
@@ -74,6 +75,7 @@ void ModelToGazebo::Reset()
 
 void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
+
     if (!ros::isInitialized())
     {
         int argc = 0;
@@ -82,12 +84,6 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     }
 
     this->nh.reset(new ros::NodeHandle(_sdf->Get<std::string>("node_name")));
-
-    // Publishers State Truth
-    this->pub_state_truth_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/acceleration", 1000);
-    this->pub_state_truth_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/velocity", 1000);
-    this->pub_state_truth_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/position", 1000);
-
     this->model = _parent;
 
     this->gznode = transport::NodePtr(new transport::Node());
@@ -116,6 +112,16 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->sub10 = nh->subscribe<std_msgs::Float32>("/command/10", 1, &ModelToGazebo::callback_cmd10, this);
     this->sub11 = nh->subscribe<std_msgs::Float32>("/command/11", 1, &ModelToGazebo::callback_cmd11, this);
     this->sub12 = nh->subscribe<std_msgs::Float32>("/command/12", 1, &ModelToGazebo::callback_cmd12, this);
+
+    // State Truth Publishers
+    this->pub_state_truth_lin_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/linear/acceleration", 1000);
+    this->pub_state_truth_lin_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/linear/velocity", 1000);
+    this->pub_state_truth_lin_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/linear/position", 1000);
+
+    this->pub_state_truth_ang_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/angular/acceleration", 1000);
+    this->pub_state_truth_ang_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/angular/velocity", 1000);
+    this->pub_state_truth_ang_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/angular/position", 1000);
+
 }
 
 void ModelToGazebo::Update()
@@ -150,6 +156,7 @@ void ModelToGazebo::Update()
 
 bool ModelToGazebo::isLoopTime(const common::Time &time, double &dt)
 {
+
     dt = (time - last_sim_time).Double();
     if (dt < 0)
     {
@@ -170,33 +177,62 @@ bool ModelToGazebo::isLoopTime(const common::Time &time, double &dt)
 void ModelToGazebo::PublishStateTruth()
 {
 
-    geometry_msgs::Vector3Stamped msg_ace = geometry_msgs::Vector3Stamped();
-    geometry_msgs::Vector3Stamped msg_vel = geometry_msgs::Vector3Stamped();
-    geometry_msgs::Vector3Stamped msg_pos = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_lin_ace = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_lin_vel = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_lin_pos = geometry_msgs::Vector3Stamped();
+
+    geometry_msgs::Vector3Stamped msg_ang_ace = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_ang_vel = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_ang_pos = geometry_msgs::Vector3Stamped();
 
     // Header
-    msg_ace.header.stamp = msg_vel.header.stamp = msg_pos.header.stamp = ros::Time::now();
-    msg_ace.header.frame_id = msg_vel.header.frame_id = msg_pos.header.frame_id = "global";
+    msg_lin_ace.header.stamp = msg_lin_vel.header.stamp = msg_lin_pos.header.stamp = ros::Time::now();
+    msg_lin_ace.header.frame_id = msg_lin_vel.header.frame_id = msg_lin_pos.header.frame_id = "global";
 
-    // Acceleration
-    msg_ace.vector.x = gaz_ace[0];
-    msg_ace.vector.y = gaz_ace[1];
-    msg_ace.vector.z = gaz_ace[2];
+    msg_ang_ace.header.stamp = msg_ang_vel.header.stamp = msg_ang_pos.header.stamp = ros::Time::now();
+    msg_ang_ace.header.frame_id = msg_ang_vel.header.frame_id = msg_ang_pos.header.frame_id = "global";
 
-    // Velocity
-    msg_vel.vector.x = gaz_vel[0];
-    msg_vel.vector.y = gaz_vel[1];
-    msg_vel.vector.z = gaz_vel[2];
+    /* -------------------- */
+    // Acceleration Linear
+    msg_lin_ace.vector.x = gaz_ace[0];
+    msg_lin_ace.vector.y = gaz_ace[1];
+    msg_lin_ace.vector.z = gaz_ace[2];
 
-    // Position
-    msg_pos.vector.x = gaz_pos[0];
-    msg_pos.vector.y = gaz_pos[1];
-    msg_pos.vector.z = gaz_pos[2];
+    // Velocity Linear
+    msg_lin_vel.vector.x = gaz_vel[0];
+    msg_lin_vel.vector.y = gaz_vel[1];
+    msg_lin_vel.vector.z = gaz_vel[2];
 
+    // Position Linear
+    msg_lin_pos.vector.x = gaz_pos[0];
+    msg_lin_pos.vector.y = gaz_pos[1];
+    msg_lin_pos.vector.z = gaz_pos[2];
+
+    /* -------------------- */
+    // Acceleration Angular
+    msg_ang_ace.vector.x = gaz_ace[3];
+    msg_ang_ace.vector.y = gaz_ace[4];
+    msg_ang_ace.vector.z = gaz_ace[5];
+
+    // Velocity Angular
+    msg_ang_vel.vector.x = gaz_vel[3];
+    msg_ang_vel.vector.y = gaz_vel[4];
+    msg_ang_vel.vector.z = gaz_vel[5];
+
+    // Position Angular
+    msg_ang_pos.vector.x = gaz_pos[3];
+    msg_ang_pos.vector.y = gaz_pos[4];
+    msg_ang_pos.vector.z = gaz_pos[5];
+
+    /* -------------------- */
     // Publish
-    pub_state_truth_ace.publish(msg_ace);
-    pub_state_truth_vel.publish(msg_vel);
-    pub_state_truth_pos.publish(msg_pos);
+    pub_state_truth_lin_ace.publish(msg_lin_ace);
+    pub_state_truth_lin_vel.publish(msg_lin_vel);
+    pub_state_truth_lin_pos.publish(msg_lin_pos);
+
+    pub_state_truth_ang_ace.publish(msg_ang_ace);
+    pub_state_truth_ang_vel.publish(msg_ang_vel);
+    pub_state_truth_ang_pos.publish(msg_ang_pos);
 }
 
 /* ------------------------
@@ -205,6 +241,7 @@ void ModelToGazebo::PublishStateTruth()
 
 void ModelToGazebo::SetState()
 {
+    
     // Acceleration
     this->model->GetLink("base_link")->SetForce(math::Vector3d(new_ace[0], new_ace[1], new_ace[2]));
     this->model->GetLink("base_link")->SetTorque(math::Vector3d(new_ace[3], new_ace[4], new_ace[5]));

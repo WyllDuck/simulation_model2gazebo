@@ -25,8 +25,13 @@
 		<arg name="headless" value="false" />
 	</include>
 
+	<!-- Configuration File (Parameters Model) -->
+    <arg name="params" default="$(find sim_vehicle)/conf/params_drone.yaml"/>
+
 	<!-- Load the URDF into the ROS Parameter Server -->
-	<param command="$(find xacro)/xacro '$(find sim_vehicle)/urdf/vehicle.urdf.xacro' --inorder" name="robot_description" />
+	<param name="robot_description"
+	command="$(find xacro)/xacro --inorder '$(find sim_vehicle)/urdf/vehicle.urdf.xacro'
+											params:='$(arg params)'"/>
 
 	<!-- Call a python script to the run a service call to gazebo_ros to spawn a URDF robot -->
 	<node args="-urdf -model vehicle -param robot_description 

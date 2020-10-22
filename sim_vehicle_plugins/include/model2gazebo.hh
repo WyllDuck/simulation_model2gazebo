@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Authors:
+ * Copyright (c) 2020 Authors:
  *   - Félix Martí Valverde <martivalverde@hotmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -84,9 +84,13 @@ namespace gazebo
         Eigen::VectorXd gaz_ace, gaz_vel, gaz_pos;
         Eigen::VectorXd new_ace, new_vel, new_pos;
 
-        ros::Publisher pub_state_truth_ace;
-        ros::Publisher pub_state_truth_vel;
-        ros::Publisher pub_state_truth_pos;
+        ros::Publisher pub_state_truth_lin_ace;
+        ros::Publisher pub_state_truth_lin_vel;
+        ros::Publisher pub_state_truth_lin_pos;
+
+        ros::Publisher pub_state_truth_ang_ace;
+        ros::Publisher pub_state_truth_ang_vel;
+        ros::Publisher pub_state_truth_ang_pos;
 
         boost::shared_ptr<ros::NodeHandle> nh;
 

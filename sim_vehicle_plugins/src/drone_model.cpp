@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Authors:
+ * Copyright (c) 2020 Authors:
  *   - Félix Martí Valverde <martivalverde@hotmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -115,15 +115,15 @@ void DronePhysicsModel::Thrust(VectorXd &_inputs, Vector3d &T_)
 {
     T_ << 0,
         0,
-        k * _inputs.sum();
+        params.k * _inputs.sum();
 }
 
 // Compute torques, given current inputs, length, drag coefficient, and thrust coefficient.
 void DronePhysicsModel::Torques(VectorXd &_inputs, Vector3d &tau_)
 {
-    tau_ << L * k * (_inputs[0] - _inputs[2]),
-            L * k * (_inputs[1] - _inputs[3]),
-            b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
+    tau_ << params.L * params.k * (_inputs[0] - _inputs[2]),
+            params.L * params.k * (_inputs[1] - _inputs[3]),
+            params.b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
 }
 
 // Compute acceleration in the global reference frame
@@ -133,9 +133,9 @@ void DronePhysicsModel::Acceleration(VectorXd &_inputs, Vector3d &a_)
     Thrust(_inputs, T);
 
     Vector3d vel(cur_vel[0], cur_vel[1], cur_vel[2]);
-    Vector3d Fd = -kd * vel;
+    Vector3d Fd = -params.kd * vel;
 
-    a_ = R_Local2Global / m * (T + Fd) + gravity;
+    a_ = R_Local2Global / params.m * (T + Fd) + params.gravity;
 }
 
 // Compute angular acceleration in the global reference frame
@@ -145,7 +145,7 @@ void DronePhysicsModel::AngularAcceleration(VectorXd &_inputs, Vector3d &omegado
     Torques(_inputs, tau);
 
     Vector3d omega(cur_vel[3], cur_vel[4], cur_vel[5]);
-    omegadot_ = I.inverse() * (tau - (omega.cross(I * omega)));
+    omegadot_ = params.I.inverse() * (tau - (omega.cross(params.I * omega)));
 
     omegadot_ = R_Local2Global * omegadot_;
 }

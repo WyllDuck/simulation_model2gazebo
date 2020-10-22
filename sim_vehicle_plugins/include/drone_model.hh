@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Authors:
+ * Copyright (c) 2020 Authors:
  *   - Félix Martí Valverde <martivalverde@hotmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -38,6 +38,23 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
+struct Parameters {
+
+    // Parameters
+    double m, L;
+
+    Eigen::Vector3d gravity;
+
+    Eigen::Matrix3d I, kd;
+
+    double k, b;
+
+    // Load Parameters
+    void Load (gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf){
+
+    }
+};
+
 class DronePhysicsModel
 {
 
@@ -62,14 +79,9 @@ public:
 
     boost::shared_ptr<ros::NodeHandle> nh;
 
+    Parameters params;
+
 private:
-    double m, L;
-
-    Eigen::Vector3d gravity;
-
-    Eigen::Matrix3d I, kd;
-
-    double k, b;
 
     void Thrust(Eigen::VectorXd &_inputs, Eigen::Vector3d &T_);
 
