@@ -77,8 +77,6 @@ namespace gazebo
         void SetState();
         void GetState();
 
-        void UpdateModel(const double &dt);
-
         void PublishStateTruth();
 
         void GetGlobal2LocalMatrix(Eigen::Matrix3d &R_);

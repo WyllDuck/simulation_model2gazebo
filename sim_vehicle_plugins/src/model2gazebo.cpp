@@ -96,6 +96,9 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     dt_required = 1.0 / _sdf->Get<double>("rate");
 
+    // Deactivate Gravity
+    this->model->SetGravityMode(false);
+
     vehicle_model = DronePhysicsModel();
     vehicle_model.Init(_parent, _sdf, this->nh);
 
@@ -138,7 +141,6 @@ void ModelToGazebo::Update()
 
     // Find Next State
     vehicle_model.Run(inputs, new_ace);
-    UpdateModel(dt);
 
     SetState();
     /*END*/
@@ -159,22 +161,6 @@ bool ModelToGazebo::isLoopTime(const common::Time &time, double &dt)
         return true;
     }
     return false;
-}
-
-/* ------------------------
-      MODEL UPDATER
------------------------- */
-
-void ModelToGazebo::UpdateModel(const double &dt)
-{
-
-    new_vel = gaz_vel + dt * new_ace;
-
-    std::cout << new_ace << std::endl;
-    std::cout << new_vel << std::endl;
-    std::cout << new_pos << std::endl;
-
-    new_pos = gaz_pos + dt * new_vel;
 }
 
 /* ------------------------
@@ -219,18 +205,9 @@ void ModelToGazebo::PublishStateTruth()
 
 void ModelToGazebo::SetState()
 {
-    /*
     // Acceleration
-    this->model->SetLinearAccel(math::Vector3d(new_ace[0], new_ace[1], new_ace[2]));
-    this->model->SetAngularAccel(math::Vector3d(new_ace[3], new_ace[4], new_ace[5]));
-    */
-
-    // Velocity
-    this->model->SetLinearVel(math::Vector3d(new_vel[0], new_vel[1], new_vel[2]));
-    this->model->SetAngularVel(math::Vector3d(new_vel[3], new_vel[4], new_vel[5]));
-
-    // Position
-    this->model->SetWorldPose(math::Pose3(new_pos[0], new_pos[1], new_pos[2], new_pos[3], new_pos[4], new_pos[5]));
+    this->model->GetLink("base_link")->SetForce(math::Vector3d(new_ace[0], new_ace[1], new_ace[2]));
+    this->model->GetLink("base_link")->SetTorque(math::Vector3d(new_ace[3], new_ace[4], new_ace[5]));
 }
 
 void ModelToGazebo::GetState()

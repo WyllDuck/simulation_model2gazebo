@@ -57,7 +57,6 @@ public:
     gazebo::physics::ModelPtr model;
 
     Eigen::VectorXd cur_pos, cur_ace, cur_vel;
-    Eigen::VectorXd fut_pos, fut_ace, fut_vel;
 
     Eigen::Matrix3d R_Global2Local, R_Local2Global;
 

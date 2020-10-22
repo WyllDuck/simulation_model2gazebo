@@ -48,14 +48,15 @@ void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr
     
     // Current State Vectors
     this->cur_ace.resize(6);
+    this->cur_ace.setZero();
+
     this->cur_vel.resize(6);
+    this->cur_vel.setZero();
+    
     this->cur_pos.resize(6);
+    this->cur_pos.setZero();
 
-    // Future State Vectors
-    this->fut_ace.resize(6);
-    this->fut_vel.resize(6);
-    this->fut_pos.resize(6);
-
+    // NodeHandler
     this->nh = _nh;
 }
 
@@ -95,13 +96,13 @@ void DronePhysicsModel::Run(VectorXd &_inputs, VectorXd &fut_ace_)
     */
 
     // Append values for model2gazebo
-    fut_ace_[0] = _inputs[0] * 10;
-    fut_ace_[1] = _inputs[1] * 10;
-    fut_ace_[2] = _inputs[2] * 10;
+    fut_ace_[0] = (_inputs[6] - _inputs[8]) * 10;
+    fut_ace_[1] = (_inputs[9] - _inputs[7]) * 10;
+    fut_ace_[2] = (_inputs[11] - _inputs[10]) * 10;
 
-    fut_ace_[3] = _inputs[3] * 10;
-    fut_ace_[4] = _inputs[4] * 10;
-    fut_ace_[5] = _inputs[5] * 10;
+    fut_ace_[3] = (_inputs[5] - _inputs[4]) * 10;
+    fut_ace_[4] = (_inputs[0] - _inputs[1]) * 10;
+    fut_ace_[5] = (_inputs[2] - _inputs[3]) * 10;
 }
 
 /* ------------------------
