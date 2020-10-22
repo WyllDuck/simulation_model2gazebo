@@ -34,13 +34,27 @@ ModelToGazebo::ModelToGazebo() : ModelPlugin()
 {
     // Gazebo State Vectors
     gaz_ace.resize(6);
+    gaz_ace.setZero();
+    
     gaz_vel.resize(6);
+    gaz_vel.setZero();
+    
     gaz_pos.resize(6);
+    gaz_pos.setZero();
 
     // Model State Vectors
     new_ace.resize(6);
+    new_ace.setZero();
+
     new_vel.resize(6);
+    new_vel.setZero();
+    
     new_pos.resize(6);
+    new_pos.setZero();
+
+    // Inputs Vector
+    inputs.resize(12);
+    inputs.setZero();
 
 }
 
@@ -84,10 +98,21 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     vehicle_model = DronePhysicsModel();
     vehicle_model.Init(_parent, _sdf, this->nh);
-    
-    ros_inputs = Inputs();
-    ros_inputs.Init(this->nh);
-    
+
+    // Inputs Subscribers
+    this->sub1 = nh->subscribe<std_msgs::Float32>("/command/1", 1, &ModelToGazebo::callback_cmd1, this);
+    this->sub2 = nh->subscribe<std_msgs::Float32>("/command/2", 1, &ModelToGazebo::callback_cmd2, this);
+    this->sub3 = nh->subscribe<std_msgs::Float32>("/command/3", 1, &ModelToGazebo::callback_cmd3, this);
+    this->sub4 = nh->subscribe<std_msgs::Float32>("/command/4", 1, &ModelToGazebo::callback_cmd4, this);
+    this->sub5 = nh->subscribe<std_msgs::Float32>("/command/5", 1, &ModelToGazebo::callback_cmd5, this);
+    this->sub6 = nh->subscribe<std_msgs::Float32>("/command/6", 1, &ModelToGazebo::callback_cmd6, this);
+
+    this->sub7 = nh->subscribe<std_msgs::Float32>("/command/7", 1, &ModelToGazebo::callback_cmd7, this);
+    this->sub8 = nh->subscribe<std_msgs::Float32>("/command/8", 1, &ModelToGazebo::callback_cmd8, this);
+    this->sub9 = nh->subscribe<std_msgs::Float32>("/command/9", 1, &ModelToGazebo::callback_cmd9, this);
+    this->sub10 = nh->subscribe<std_msgs::Float32>("/command/10", 1, &ModelToGazebo::callback_cmd10, this);
+    this->sub11 = nh->subscribe<std_msgs::Float32>("/command/11", 1, &ModelToGazebo::callback_cmd11, this);
+    this->sub12 = nh->subscribe<std_msgs::Float32>("/command/12", 1, &ModelToGazebo::callback_cmd12, this);
 }
 
 void ModelToGazebo::Update()
@@ -112,7 +137,7 @@ void ModelToGazebo::Update()
     vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
 
     // Find Next State
-    vehicle_model.Run(ros_inputs.inputs, new_ace);
+    vehicle_model.Run(inputs, new_ace);
     UpdateModel(dt);
 
     SetState();

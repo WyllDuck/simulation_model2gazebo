@@ -29,6 +29,7 @@
 
 // ROS Msgs
 #include <geometry_msgs/Vector3Stamped.h>
+#include <std_msgs/Float32.h>
 
 // Includes
 #include <eigen3/Eigen/Dense>
@@ -50,7 +51,6 @@
 
 // PhysicsModel Simulation
 #include <drone_model.hh>
-#include <inputs.hh>
 
 namespace gazebo
 {
@@ -68,8 +68,6 @@ namespace gazebo
         void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
     private:
-        Inputs ros_inputs;
-
         DronePhysicsModel vehicle_model;
 
         void Update();
@@ -104,6 +102,29 @@ namespace gazebo
 
         common::Time last_sim_time;
         double dt_required;
+        
+        /* ---------
+            INPUTS
+         --------- */
+        ros::Subscriber sub1, sub2, sub3, sub4, sub5, sub6;
+        ros::Subscriber sub7, sub8, sub9, sub10, sub11, sub12;
+
+        void callback_cmd1(const std_msgs::Float32::ConstPtr &msg) { inputs[0] = msg->data; }
+        void callback_cmd2(const std_msgs::Float32::ConstPtr &msg) { inputs[1] = msg->data; }
+        void callback_cmd3(const std_msgs::Float32::ConstPtr &msg) { inputs[2] = msg->data; }
+        void callback_cmd4(const std_msgs::Float32::ConstPtr &msg) { inputs[3] = msg->data; }
+        void callback_cmd5(const std_msgs::Float32::ConstPtr &msg) { inputs[4] = msg->data; }
+        void callback_cmd6(const std_msgs::Float32::ConstPtr &msg) { inputs[5] = msg->data; }
+
+        void callback_cmd7(const std_msgs::Float32::ConstPtr &msg) { inputs[6] = msg->data; }
+        void callback_cmd8(const std_msgs::Float32::ConstPtr &msg) { inputs[7] = msg->data; }
+        void callback_cmd9(const std_msgs::Float32::ConstPtr &msg) { inputs[8] = msg->data; }
+        void callback_cmd10(const std_msgs::Float32::ConstPtr &msg) { inputs[9] = msg->data; }
+        void callback_cmd11(const std_msgs::Float32::ConstPtr &msg) { inputs[10] = msg->data; }
+        void callback_cmd12(const std_msgs::Float32::ConstPtr &msg) { inputs[11] = msg->data; }
+
+        Eigen::VectorXd inputs;
+
     };
 
 } // namespace gazebo
