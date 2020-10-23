@@ -17,9 +17,9 @@
         <inertial>
             <mass value="${params['mass']}" />
             <origin xyz="0 0 0" />
-            <inertia ixx="${params['inertial']['ixx']}" ixy="${params['inertial']['ixy']}" ixz="${params['inertial']['ixz']}"
-                     iyx="${params['inertial']['iyx']}" iyy="${params['inertial']['iyy']}" iyz="${params['inertial']['iyz']}"
-                     izx="${params['inertial']['izx']}" izy="${params['inertial']['izy']}" izz="${params['inertial']['izz']}"/>
+            <inertia ixx="${params['inertial']['xx']}" ixy="${params['inertial']['xy']}" ixz="${params['inertial']['xz']}"
+                     iyy="${params['inertial']['yy']}" iyz="${params['inertial']['yz']}"
+                     izz="${params['inertial']['zz']}"/>
         </inertial>
 
         <visual>
@@ -30,9 +30,9 @@
         </visual>
 
         <collision>
-            <origin xyz="0 0.5 0" rpy="0 0 0" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <box size="1 1 1" />
+                <sphere radius="0.3"/>
             </geometry>
         </collision>
 
@@ -43,6 +43,7 @@
         <plugin filename="libmodel2gazebo.so" name="model2gazebo">
             <node_name>model2gazebo</node_name>
             <rate>100</rate>
+            <yaml_config>$(arg params)</yaml_config>
         </plugin>
     </gazebo>
 

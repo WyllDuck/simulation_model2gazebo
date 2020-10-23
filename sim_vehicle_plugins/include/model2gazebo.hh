@@ -79,10 +79,8 @@ namespace gazebo
 
         void PublishStateTruth();
 
-        void GetGlobal2LocalMatrix(Eigen::Matrix3d &R_);
-
         Eigen::VectorXd gaz_ace, gaz_vel, gaz_pos;
-        Eigen::VectorXd new_ace, new_vel, new_pos;
+        Eigen::Vector3d force, torque;
 
         ros::Publisher pub_state_truth_lin_ace;
         ros::Publisher pub_state_truth_lin_vel;

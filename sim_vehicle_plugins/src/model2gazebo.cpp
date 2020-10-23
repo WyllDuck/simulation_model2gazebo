@@ -44,15 +44,9 @@ ModelToGazebo::ModelToGazebo() : ModelPlugin()
     gaz_pos.setZero();
 
     // Model State Vectors
-    new_ace.resize(6);
-    new_ace.setZero();
-
-    new_vel.resize(6);
-    new_vel.setZero();
+    force.setZero();
+    torque.setZero();
     
-    new_pos.resize(6);
-    new_pos.setZero();
-
     // Inputs Vector
     inputs.resize(12);
     inputs.setZero();
@@ -146,7 +140,7 @@ void ModelToGazebo::Update()
     vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
 
     // Find Next State
-    vehicle_model.Run(inputs, new_ace);
+    vehicle_model.Run(inputs, force, torque);
 
     SetState();
     /*END*/
@@ -242,96 +236,63 @@ void ModelToGazebo::PublishStateTruth()
 void ModelToGazebo::SetState()
 {
     
-    // Acceleration
-    this->model->GetLink("base_link")->SetForce(math::Vector3d(new_ace[0], new_ace[1], new_ace[2]));
-    this->model->GetLink("base_link")->SetTorque(math::Vector3d(new_ace[3], new_ace[4], new_ace[5]));
+    // Apply Force
+    this->model->GetLink("base_link")->SetForce(math::Vector3d(force[0], force[1], force[2]));
+    this->model->GetLink("base_link")->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
 }
 
 void ModelToGazebo::GetState()
 {
 
     /* ----------------------------------
-            Reference Frame Global 
+            Reference Frame GLOBAL 
     ---------------------------------- */
-    // position (x, y, z, roll, pitch, yaw)
-    math::Pose3d global_pos_gaz = this->model->WorldPose();
-
-    // mini append information
-    gaz_pos[0] = global_pos_gaz.Pos()[0];
-    gaz_pos[1] = global_pos_gaz.Pos()[1];
-    gaz_pos[2] = global_pos_gaz.Pos()[2];
-
-    gaz_pos[3] = global_pos_gaz.Rot().Roll();
-    gaz_pos[4] = global_pos_gaz.Rot().Pitch();
-    gaz_pos[5] = global_pos_gaz.Rot().Yaw();
-
-    // velocity
-    math::Vector3d lin_vel_gaz = this->model->WorldLinearVel();
-    math::Vector3d ang_vel_gaz = this->model->WorldAngularVel();
-
-    // acceleration
-    math::Vector3d lin_accel_gaz = this->model->WorldLinearAccel();
-    math::Vector3d ang_accel_gaz = this->model->WorldAngularAccel();
+    // Position (x, y, z, roll, pitch, yaw)
+    math::Pose3d pos_gaz = this->model->WorldPose();
 
     /* ----------------------------------
-        Reference Frame Local (Vehicle) 
+            Reference Frame LOCAL 
     ---------------------------------- */
-    // transformation tools
-    Eigen::Matrix3d R;
-    GetGlobal2LocalMatrix(R);
+    // Velocity
+    math::Vector3d lin_vel_gaz = this->model->RelativeLinearVel();
+    math::Vector3d ang_vel_gaz = this->model->RelativeAngularVel();
 
-    // velocity
-    Eigen::Vector3d lin_global_velocity(lin_vel_gaz[0], lin_vel_gaz[1], lin_vel_gaz[2]);
-    Eigen::Vector3d lin_local_velocity = R * lin_global_velocity;
-
-    Eigen::Vector3d ang_global_velocity(ang_vel_gaz[0], ang_vel_gaz[1], ang_vel_gaz[2]);
-    Eigen::Vector3d ang_local_velocity = R * ang_global_velocity;
-
-    // acceleration
-    Eigen::Vector3d lin_global_acceleration(lin_accel_gaz[0], lin_accel_gaz[1], lin_accel_gaz[2]);
-    Eigen::Vector3d lin_local_acceleration = R * lin_global_acceleration;
-
-    Eigen::Vector3d ang_global_acceleration(ang_accel_gaz[0], ang_accel_gaz[1], ang_accel_gaz[2]);
-    Eigen::Vector3d ang_local_acceleration = R * ang_global_acceleration;
+    // Acceleration
+    math::Vector3d lin_accel_gaz = this->model->RelativeLinearAccel();
+    math::Vector3d ang_accel_gaz = this->model->RelativeAngularAccel();
 
     /* ----------------------------------
         Append Information 
     ---------------------------------- */
-    gaz_ace[0] = lin_local_acceleration[0];
-    gaz_ace[1] = lin_local_acceleration[1];
-    gaz_ace[2] = lin_local_acceleration[2];
+    // Position Linear
+    gaz_pos[0] = pos_gaz.Pos()[0];
+    gaz_pos[1] = pos_gaz.Pos()[1];
+    gaz_pos[2] = pos_gaz.Pos()[2];
 
-    gaz_ace[3] = ang_local_acceleration[0];
-    gaz_ace[4] = ang_local_acceleration[1];
-    gaz_ace[5] = ang_local_acceleration[2];
+    // Position Angular
+    gaz_pos[3] = pos_gaz.Rot().Roll();
+    gaz_pos[4] = pos_gaz.Rot().Pitch();
+    gaz_pos[5] = pos_gaz.Rot().Yaw();
 
-    gaz_vel[0] = lin_local_velocity[0];
-    gaz_vel[1] = lin_local_velocity[1];
-    gaz_vel[2] = lin_local_velocity[2];
+    // Velocity Linear
+    gaz_ace[0] = lin_vel_gaz[0];
+    gaz_ace[1] = lin_vel_gaz[1];
+    gaz_ace[2] = lin_vel_gaz[2];
 
-    gaz_vel[3] = ang_local_velocity[0];
-    gaz_vel[4] = ang_local_velocity[1];
-    gaz_vel[5] = ang_local_velocity[2];
-}
+    // Velocity Angular
+    gaz_ace[3] = ang_vel_gaz[0];
+    gaz_ace[4] = ang_vel_gaz[1];
+    gaz_ace[5] = ang_vel_gaz[2];
 
-/* ------------------------
-    AUXILIARY FUNCTIONS
------------------------- */
+    // Acceleration Linear
+    gaz_vel[0] = lin_accel_gaz[0];
+    gaz_vel[1] = lin_accel_gaz[1];
+    gaz_vel[2] = lin_accel_gaz[2];
 
-void ModelToGazebo::GetGlobal2LocalMatrix(Eigen::Matrix3d &R_)
-{
-
-    double c0 = cos(gaz_pos[3]);
-    double c1 = cos(gaz_pos[4]);
-    double c2 = cos(gaz_pos[5]);
-
-    double s0 = sin(gaz_pos[3]);
-    double s1 = sin(gaz_pos[4]);
-    double s2 = sin(gaz_pos[5]);
-
-    R_ << c0 * c1, c0 * s1 * s2 - s0 * c2, c0 * s1 * s2 + s0 * s2,
-        s0 * c1, s0 * s1 * s2 + c0 * c2, s0 * s1 * c2 - c0 * s2,
-        -s1, c1 * s2, c1 * c2;
+    // Acceleration Angular
+    gaz_vel[3] = ang_accel_gaz[0];
+    gaz_vel[4] = ang_accel_gaz[1];
+    gaz_vel[5] = ang_accel_gaz[2];
 }
 
 GZ_REGISTER_MODEL_PLUGIN(ModelToGazebo)

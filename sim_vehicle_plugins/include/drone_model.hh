@@ -31,6 +31,7 @@
 #include <eigen3/Eigen/Dense>
 #include <math.h>
 #include <chrono>
+#include "yaml-cpp/yaml.h"
 
 // Gazebo
 #include <functional>
@@ -38,10 +39,12 @@
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
 
+using namespace std;
+
 struct Parameters {
 
     // Parameters
-    double m, L;
+    double mass, L;
 
     Eigen::Vector3d gravity;
 
@@ -49,9 +52,21 @@ struct Parameters {
 
     double k, b;
 
-    // Load Parameters
-    void Load (gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf){
+    // Print Parameters
+    void Print(){
 
+        cout << "**********************" << endl;
+        cout << "Parameters:\n\n";
+
+        cout << "\tmass: " << mass << endl;
+        cout << "\tL: " << L << endl;
+        cout << "\tk: " << k << endl;
+        cout << "\tb: " << b << endl;
+        cout << "\tgravity:\n" << gravity << endl;
+        cout << "\tI:\n" << I << endl;
+        cout << "\tkd:\n" << kd << endl;
+
+        cout << "**********************" << endl;
     }
 };
 
@@ -63,15 +78,19 @@ public:
 
     ~DronePhysicsModel();
 
-    void Run(Eigen::VectorXd &_inputs, Eigen::VectorXd &fut_ace_);
+    void Run(Eigen::VectorXd &_inputs, Eigen::Vector3d &force_, Eigen::Vector3d &torque_);
 
     void Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &nh);
+
+    void LoadParameters();
 
     void UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos);
 
     void GetTransformtionMatrices();
 
     gazebo::physics::ModelPtr model;
+
+    sdf::ElementPtr sdf;
 
     Eigen::VectorXd cur_pos, cur_ace, cur_vel;
 

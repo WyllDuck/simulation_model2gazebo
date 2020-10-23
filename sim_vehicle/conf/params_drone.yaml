@@ -24,32 +24,19 @@ b: 1 # Torque Propellers
 
 # Friction Matrix
 kd:
-    kdxx: 1
-    kdxy: 0
-    kdxz: 0
-
-    kdyx: 0
-    kdyy: 1
-    kdyz: 0
-    
-    kdzx: 0
-    kdzy: 0
-    kdzz: 1
+    xx: 1
+    yy: 1
+    zz: 1
 
 # Inertial Matrix
 inertial:
-    ixx: 1
-    ixy: 0
-    ixz: 0  
+    xx: 1
+    xy: 0
+    xz: 0  
+    yy: 1
+    yz: 0
+    zz: 1
 
-    iyx: 0
-    iyy: 1
-    iyz: 0
-
-    izx: 0
-    izy: 0
-    izz: 1
-
-gravity: 9.81 # Graviti force       [m/s^2]
+gravity: 9.81 # Graviti Force       [m/s^2]
 mass: 10 # Mass Vehicle             [kg]
 L: 1.53 # Vehicle Length            [m]

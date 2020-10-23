@@ -26,7 +26,7 @@
 using namespace Eigen;
 
 /* ------------------------
-     INIT, DEL & RUN
+        INIT, DEL
 ------------------------ */
 
 DronePhysicsModel::DronePhysicsModel()
@@ -38,13 +38,66 @@ DronePhysicsModel::~DronePhysicsModel()
 }
 
 /* ------------------------
-      BASIC FUNCTIONS
+        LOAD & INIT
 ------------------------ */
+
+void DronePhysicsModel::LoadParameters (){
+
+    // Load Parameters From Model
+    gazebo::physics::InertialPtr inertial = this->model->GetLink("base_link")->GetInertial();
+
+    params.I.setZero();
+    params.I(0, 0) = inertial->IXX();
+    params.I(0, 1) = inertial->IXY();
+    params.I(0, 2) = inertial->IXZ();
+
+    params.I(1, 0) = inertial->IXY();
+    params.I(1, 1) = inertial->IYY();
+    params.I(1, 2) = inertial->IYZ();
+
+    params.I(2, 0) = inertial->IXZ();
+    params.I(2, 1) = inertial->IYZ();
+    params.I(2, 2) = inertial->IZZ();
+
+    params.mass = inertial->Mass();
+
+    // Load Parameters From YAML
+    // Get YAML File Direction
+    string yaml_config;
+    if (this->sdf->HasElement("yaml_config")) {
+        yaml_config = this->sdf->Get<string>("yaml_config");
+    } else {
+        ROS_ERROR("Model2Gazebo: 'yaml_config' parameter does not exist, check launch file.");
+        return;
+    }
+
+    // Open YAML File
+    ROS_INFO("Model2Gazebo: Loading parameters from %s", yaml_config.c_str());
+    YAML::Node config = YAML::LoadFile(yaml_config);
+    
+    // Set Parameters Values
+    params.gravity.setZero();
+    params.gravity[2] = - config["gravity"].as<double>(); // SIGN CHANGE
+
+    params.L = config["L"].as<double>();
+    params.k = config["k"].as<double>();
+    params.b = config["b"].as<double>();
+
+    params.kd.setZero();
+    params.kd(0, 0) = config["kd"]["xx"].as<double>();
+    params.kd(1, 1) = config["kd"]["yy"].as<double>();
+    params.kd(2, 2) = config["kd"]["zz"].as<double>();
+
+    // Finished Notification
+    ROS_INFO("Model2Gazebo: Parameters loaded successfully.");
+    params.Print();
+}
 
 void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &_nh)
 {
     // Save Model
     this->model = _parent;
+    this->sdf = _sdf;
     
     // Current State Vectors
     this->cur_ace.resize(6);
@@ -58,7 +111,15 @@ void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr
 
     // NodeHandler
     this->nh = _nh;
+
+    // Load Parameters
+    params = Parameters();
+    LoadParameters();
 }
+
+/* ------------------------
+      BASIC FUNCTIONS
+------------------------ */
 
 void DronePhysicsModel::UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos)
 {
@@ -85,7 +146,7 @@ void DronePhysicsModel::GetTransformtionMatrices()
     
 }
 
-void DronePhysicsModel::Run(VectorXd &_inputs, VectorXd &fut_ace_)
+void DronePhysicsModel::Run(VectorXd &_inputs, Vector3d &force_, Vector3d &torque_)
 {
 
     // Compute linear and angular accelerations.
@@ -95,14 +156,14 @@ void DronePhysicsModel::Run(VectorXd &_inputs, VectorXd &fut_ace_)
     AngularAcceleration(_inputs, omegadot);
     */
 
-    // Append values for model2gazebo
-    fut_ace_[0] = (_inputs[6] - _inputs[8]) * 10;
-    fut_ace_[1] = (_inputs[9] - _inputs[7]) * 10;
-    fut_ace_[2] = (_inputs[11] - _inputs[10]) * 10;
+    // Append values for model2gazebo - Reference Frame LOCAL
+    force_[0] = (_inputs[6] - _inputs[8])   * 10;
+    force_[1] = (_inputs[9] - _inputs[7])   * 10;
+    force_[2] = (_inputs[11] - _inputs[10]) * 10;
 
-    fut_ace_[3] = (_inputs[5] - _inputs[4]) * 10;
-    fut_ace_[4] = (_inputs[0] - _inputs[1]) * 10;
-    fut_ace_[5] = (_inputs[2] - _inputs[3]) * 10;
+    torque_[0] = (_inputs[5] - _inputs[4])  * 10;
+    torque_[1] = (_inputs[0] - _inputs[1])  * 10;
+    torque_[2] = (_inputs[2] - _inputs[3])  * 10;
 }
 
 /* ------------------------
@@ -135,7 +196,7 @@ void DronePhysicsModel::Acceleration(VectorXd &_inputs, Vector3d &a_)
     Vector3d vel(cur_vel[0], cur_vel[1], cur_vel[2]);
     Vector3d Fd = -params.kd * vel;
 
-    a_ = R_Local2Global / params.m * (T + Fd) + params.gravity;
+    a_ = R_Local2Global / params.mass * (T + Fd) + params.gravity;
 }
 
 // Compute angular acceleration in the global reference frame

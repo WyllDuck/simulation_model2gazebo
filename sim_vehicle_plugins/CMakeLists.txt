@@ -18,7 +18,7 @@ catkin_package()
 add_library(model2gazebo SHARED src/model2gazebo.cpp
 								src/drone_model.cpp)
 
-target_link_libraries(model2gazebo ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} )
+target_link_libraries(model2gazebo ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES} yaml-cpp)
 
 install(DIRECTORY include/
   	DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
