@@ -50,7 +50,8 @@
 #include <gazebo/common/common.hh>
 
 // PhysicsModel Simulation
-#include <drone_model.hh>
+#define MODEL_NAME BlankModel
+#include <blank_model.hh>
 
 namespace gazebo
 {
@@ -68,7 +69,7 @@ namespace gazebo
         void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
     private:
-        DronePhysicsModel vehicle_model;
+        MODEL_NAME vehicle_model;
 
         void Update();
 
@@ -99,6 +100,8 @@ namespace gazebo
         transport::NodePtr gznode;
 
         physics::ModelPtr model;
+
+        physics::LinkPtr base_link;
 
         common::Time last_sim_time;
         double dt_required;

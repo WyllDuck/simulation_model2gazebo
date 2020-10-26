@@ -12,8 +12,8 @@ class KeyboardControl:
     def __init__ (self):
 
         # Parameters
-        self.change_rate = 0.08
-        self.saturation = 1
+        self.change_rate = 0.2
+        self.saturation = 10
         
         self.key_strokes = dict()
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     # Init Publisher Class
     keyboard_control = KeyboardControl()
-    rate = rospy.Rate(30)
+    rate = rospy.Rate(60)
     
     while not rospy.is_shutdown():
 

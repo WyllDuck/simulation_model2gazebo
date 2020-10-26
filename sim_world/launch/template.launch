@@ -26,7 +26,7 @@
 	</include>
 
 	<!-- Configuration File (Parameters Model) -->
-    <arg name="params" default="$(find sim_vehicle)/conf/params_drone.yaml"/>
+    <arg name="params" default="$(find sim_vehicle)/conf/params_blank.yaml"/>
 
 	<!-- Load the URDF into the ROS Parameter Server -->
 	<param name="robot_description"

@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-#include "drone_model.hh"
+#include "blank_model.hh"
 
 using namespace Eigen;
 
@@ -29,11 +29,11 @@ using namespace Eigen;
         INIT, DEL
 ------------------------ */
 
-DronePhysicsModel::DronePhysicsModel()
+BlankModel::BlankModel()
 {
 }
 
-DronePhysicsModel::~DronePhysicsModel()
+BlankModel::~BlankModel()
 {
 }
 
@@ -41,7 +41,7 @@ DronePhysicsModel::~DronePhysicsModel()
         LOAD & INIT
 ------------------------ */
 
-void DronePhysicsModel::LoadParameters (){
+void BlankModel::LoadParameters (){
 
     // Load Parameters From Model
     gazebo::physics::InertialPtr inertial = this->model->GetLink("base_link")->GetInertial();
@@ -79,10 +79,6 @@ void DronePhysicsModel::LoadParameters (){
     params.gravity.setZero();
     params.gravity[2] = - config["gravity"].as<double>(); // SIGN CHANGE
 
-    params.L = config["L"].as<double>();
-    params.k = config["k"].as<double>();
-    params.b = config["b"].as<double>();
-
     params.kd.setZero();
     params.kd(0, 0) = config["kd"]["xx"].as<double>();
     params.kd(1, 1) = config["kd"]["yy"].as<double>();
@@ -93,7 +89,7 @@ void DronePhysicsModel::LoadParameters (){
     params.Print();
 }
 
-void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &_nh)
+void BlankModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &_nh)
 {
     // Save Model
     this->model = _parent;
@@ -121,14 +117,14 @@ void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr
       BASIC FUNCTIONS
 ------------------------ */
 
-void DronePhysicsModel::UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos)
+void BlankModel::UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos)
 {
     this->cur_ace = _cur_ace;
     this->cur_vel = _cur_vel;
     this->cur_pos = _cur_pos;
 }
 
-void DronePhysicsModel::GetTransformtionMatrices()
+void BlankModel::GetTransformtionMatrices()
 {
     double c0 = cos(cur_pos[3]);
     double c1 = cos(cur_pos[4]);
@@ -146,67 +142,15 @@ void DronePhysicsModel::GetTransformtionMatrices()
     
 }
 
-void DronePhysicsModel::Run(VectorXd &_inputs, Vector3d &force_, Vector3d &torque_)
+void BlankModel::Run(VectorXd &_inputs, Vector3d &force_, Vector3d &torque_)
 {
-
-    // Compute linear and angular accelerations.
-    /*
-    Vector3d a, omegadot;
-    Acceleration(_inputs, a);
-    AngularAcceleration(_inputs, omegadot);
-    */
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    force_[0] = (_inputs[6] - _inputs[8])   * 10;
-    force_[1] = (_inputs[9] - _inputs[7])   * 10;
-    force_[2] = (_inputs[11] - _inputs[10]) * 10;
+    force_[0] = (_inputs[6] - _inputs[8]);
+    force_[1] = (_inputs[9] - _inputs[7]);
+    force_[2] = (_inputs[11] - _inputs[10]);
 
-    torque_[0] = (_inputs[5] - _inputs[4])  * 10;
-    torque_[1] = (_inputs[0] - _inputs[1])  * 10;
-    torque_[2] = (_inputs[2] - _inputs[3])  * 10;
-}
-
-/* ------------------------
-    AUXILIARY FUNCTIONS
------------------------- */
-// NOTE: Inputs (_inputs) are values for ωi
-
-// Compute thrust given current inputs and thrust coefficient.
-void DronePhysicsModel::Thrust(VectorXd &_inputs, Vector3d &T_)
-{
-    T_ << 0,
-        0,
-        params.k * _inputs.sum();
-}
-
-// Compute torques, given current inputs, length, drag coefficient, and thrust coefficient.
-void DronePhysicsModel::Torques(VectorXd &_inputs, Vector3d &tau_)
-{
-    tau_ << params.L * params.k * (_inputs[0] - _inputs[2]),
-            params.L * params.k * (_inputs[1] - _inputs[3]),
-            params.b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
-}
-
-// Compute acceleration in the global reference frame
-void DronePhysicsModel::Acceleration(VectorXd &_inputs, Vector3d &a_)
-{
-    Vector3d T;
-    Thrust(_inputs, T);
-
-    Vector3d vel(cur_vel[0], cur_vel[1], cur_vel[2]);
-    Vector3d Fd = -params.kd * vel;
-
-    a_ = R_Local2Global / params.mass * (T + Fd) + params.gravity;
-}
-
-// Compute angular acceleration in the global reference frame
-void DronePhysicsModel::AngularAcceleration(VectorXd &_inputs, Vector3d &omegadot_)
-{
-    Vector3d tau;
-    Torques(_inputs, tau);
-
-    Vector3d omega(cur_vel[3], cur_vel[4], cur_vel[5]);
-    omegadot_ = params.I.inverse() * (tau - (omega.cross(params.I * omega)));
-
-    omegadot_ = R_Local2Global * omegadot_;
+    torque_[0] = (_inputs[5] - _inputs[4]);
+    torque_[1] = (_inputs[0] - _inputs[1]);
+    torque_[2] = (_inputs[2] - _inputs[3]);
 }

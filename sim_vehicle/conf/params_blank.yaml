@@ -19,9 +19,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-k: 1 # Thrust Propellers
-b: 1 # Torque Propellers
-
 # Aerodynamic Friction Matrix
 kd:
     xx: 1
@@ -39,4 +36,3 @@ inertial:
 
 gravity: 9.81 # Graviti Force       [m/s^2]
 mass: 10 # Mass Vehicle             [kg]
-L: 1.53 # Vehicle Length            [m]

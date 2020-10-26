@@ -79,6 +79,7 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     this->nh.reset(new ros::NodeHandle(_sdf->Get<std::string>("node_name")));
     this->model = _parent;
+    this->base_link = this->model->GetLink("base_link");
 
     this->gznode = transport::NodePtr(new transport::Node());
     this->gznode->Init();
@@ -86,10 +87,11 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     dt_required = 1.0 / _sdf->Get<double>("rate");
 
-    // Deactivate Gravity
+    // Deactivate Gravity & Wind
     this->model->SetGravityMode(false);
+    this->model->SetWindMode(false);
 
-    vehicle_model = DronePhysicsModel();
+    vehicle_model = MODEL_NAME();
     vehicle_model.Init(_parent, _sdf, this->nh);
 
     // Inputs Subscribers
@@ -108,13 +110,13 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->sub12 = nh->subscribe<std_msgs::Float32>("/command/12", 1, &ModelToGazebo::callback_cmd12, this);
 
     // State Truth Publishers
-    this->pub_state_truth_lin_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/linear/acceleration", 1000);
-    this->pub_state_truth_lin_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/linear/velocity", 1000);
-    this->pub_state_truth_lin_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/linear/position", 1000);
+    this->pub_state_truth_lin_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/acceleration", 1000);
+    this->pub_state_truth_lin_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/velocity", 1000);
+    this->pub_state_truth_lin_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/position", 1000);
 
-    this->pub_state_truth_ang_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/angular/acceleration", 1000);
-    this->pub_state_truth_ang_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/angular/velocity", 1000);
-    this->pub_state_truth_ang_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/angular/position", 1000);
+    this->pub_state_truth_ang_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/acceleration", 1000);
+    this->pub_state_truth_ang_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/velocity", 1000);
+    this->pub_state_truth_ang_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/position", 1000);
 
 }
 
@@ -237,29 +239,29 @@ void ModelToGazebo::SetState()
 {
     
     // Apply Force
-    this->model->GetLink("base_link")->SetForce(math::Vector3d(force[0], force[1], force[2]));
-    this->model->GetLink("base_link")->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
+    this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
+    this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
 }
 
 void ModelToGazebo::GetState()
 {
 
-    /* ----------------------------------
-            Reference Frame GLOBAL 
-    ---------------------------------- */
-    // Position (x, y, z, roll, pitch, yaw)
-    math::Pose3d pos_gaz = this->model->WorldPose();
+    // Position (x, y, z, roll, pitch, yaw) (Reference Frame GLOBAL)
+    math::Pose3d pos_gaz = this->base_link->WorldCoGPose();
 
-    /* ----------------------------------
-            Reference Frame LOCAL 
-    ---------------------------------- */
     // Velocity
-    math::Vector3d lin_vel_gaz = this->model->RelativeLinearVel();
-    math::Vector3d ang_vel_gaz = this->model->RelativeAngularVel();
+    /* Reference Frame LOCAL
+    math::Vector3d lin_vel_gaz = this->base_link->RelativeLinearVel();
+    math::Vector3d ang_vel_gaz = this->base_link->RelativeAngularVel();
+    */
+    /* Reference Frame GLOBAL*/
+    math::Vector3d lin_vel_gaz = this->base_link->WorldLinearVel();
+    math::Vector3d ang_vel_gaz = this->base_link->WorldAngularVel();
 
     // Acceleration
-    math::Vector3d lin_accel_gaz = this->model->RelativeLinearAccel();
-    math::Vector3d ang_accel_gaz = this->model->RelativeAngularAccel();
+    /* Reference Frame GLOBAL*/
+    math::Vector3d lin_accel_gaz = this->base_link->WorldLinearAccel();
+    math::Vector3d ang_accel_gaz = this->base_link->WorldAngularAccel();
 
     /* ----------------------------------
         Append Information 
@@ -275,24 +277,27 @@ void ModelToGazebo::GetState()
     gaz_pos[5] = pos_gaz.Rot().Yaw();
 
     // Velocity Linear
-    gaz_ace[0] = lin_vel_gaz[0];
-    gaz_ace[1] = lin_vel_gaz[1];
-    gaz_ace[2] = lin_vel_gaz[2];
+    gaz_vel[0] = lin_vel_gaz[0];
+    gaz_vel[1] = lin_vel_gaz[1];
+    gaz_vel[2] = lin_vel_gaz[2];
 
     // Velocity Angular
-    gaz_ace[3] = ang_vel_gaz[0];
-    gaz_ace[4] = ang_vel_gaz[1];
-    gaz_ace[5] = ang_vel_gaz[2];
+    gaz_vel[3] = ang_vel_gaz[0];
+    gaz_vel[4] = ang_vel_gaz[1];
+    gaz_vel[5] = ang_vel_gaz[2];
 
+    // NOTE: These values are taken directly from the force & torque applied by the model
+    //       and the iteraction recorded by the API is added to correct collisions.
+    // Reference Frame GLOBAL
     // Acceleration Linear
-    gaz_vel[0] = lin_accel_gaz[0];
-    gaz_vel[1] = lin_accel_gaz[1];
-    gaz_vel[2] = lin_accel_gaz[2];
+    gaz_ace[0] = force[0] / this->vehicle_model.params.mass + lin_accel_gaz[0];
+    gaz_ace[1] = force[1] / this->vehicle_model.params.mass + lin_accel_gaz[1];
+    gaz_ace[2] = force[2] / this->vehicle_model.params.mass + lin_accel_gaz[2];
 
     // Acceleration Angular
-    gaz_vel[3] = ang_accel_gaz[0];
-    gaz_vel[4] = ang_accel_gaz[1];
-    gaz_vel[5] = ang_accel_gaz[2];
+    gaz_ace[3] = torque[0] / this->vehicle_model.params.I(0,0) + ang_accel_gaz[0];
+    gaz_ace[4] = torque[1] / this->vehicle_model.params.I(1,1) + ang_accel_gaz[1];
+    gaz_ace[5] = torque[2] / this->vehicle_model.params.I(2,2) + ang_accel_gaz[2];
 }
 
 GZ_REGISTER_MODEL_PLUGIN(ModelToGazebo)
