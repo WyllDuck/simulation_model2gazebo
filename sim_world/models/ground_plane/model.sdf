@@ -9,14 +9,14 @@
                 <geometry>
                     <plane>
                         <normal>0 0 1</normal>
-                        <size>300 300</size>
+                        <size>3000 3000</size>
                     </plane>
                 </geometry>
 
                 <surface>
                     <friction>
                         <ode>
-                            <mu>1.6</mu> <!-- Ideal conditions would be 1.8, normal 1.2, maximum obtained 1.6 -->
+                            <mu>0</mu>
                         </ode>
                         <torsional>
                             <ode />
