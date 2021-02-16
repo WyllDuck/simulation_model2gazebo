@@ -147,6 +147,7 @@ void ModelToGazebo::Update()
     SetState();
     /*END*/
 
+    BroadcastTF(gaz_pos, cur_time, "map", "base_link");
     last_sim_time = cur_time;
 }
 
@@ -169,6 +170,23 @@ bool ModelToGazebo::isLoopTime(const common::Time &time, double &dt)
 /* ------------------------
       ROS PUBLISHERS
 ------------------------ */
+
+// TF Broadcaster Function
+void ModelToGazebo::BroadcastTF(Eigen::VectorXd &_position, common::Time _cur_time, string _parent, string _child)
+{
+    // TF Broadcaster
+    static tf::TransformBroadcaster br;
+
+    // Publish TF
+    tf::Transform transform;
+    transform.setOrigin( tf::Vector3(_position[0], _position[1], _position[2]) );
+    
+    tf::Quaternion q;
+    q.setRPY(_position[3], _position[4], _position[5]);
+    transform.setRotation(q);
+    
+    br.sendTransform(tf::StampedTransform(transform, ros::Time(_cur_time.Double()), _parent, _child));
+}
 
 void ModelToGazebo::PublishStateTruth()
 {

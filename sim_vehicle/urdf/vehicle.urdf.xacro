@@ -25,14 +25,14 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://sim_vehicle/meshes/vehicle.dae" />
+                <mesh filename="package://sim_vehicle/meshes/drone.dae" />
             </geometry>
         </visual>
 
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <sphere radius="0.3"/>
+                <sphere radius="0.075"/>
             </geometry>
         </collision>
 

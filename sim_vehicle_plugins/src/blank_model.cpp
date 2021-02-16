@@ -146,11 +146,11 @@ void BlankModel::Run(VectorXd &_inputs, Vector3d &force_, Vector3d &torque_)
 {
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    force_[0] = (_inputs[6] - _inputs[8]);
-    force_[1] = (_inputs[9] - _inputs[7]);
-    force_[2] = (_inputs[11] - _inputs[10]);
+    force_[0] = (_inputs[0]);
+    force_[1] = (_inputs[1]);
+    force_[2] = (_inputs[2]);
 
-    torque_[0] = (_inputs[5] - _inputs[4]);
-    torque_[1] = (_inputs[0] - _inputs[1]);
-    torque_[2] = (_inputs[2] - _inputs[3]);
+    torque_[0] = (_inputs[3]);
+    torque_[1] = (_inputs[4]);
+    torque_[2] = (_inputs[5]);
 }

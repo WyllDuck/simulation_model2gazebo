@@ -27,8 +27,12 @@
 // ROS
 #include <ros/ros.h>
 
+// TF
+#include <tf/transform_broadcaster.h>
+
 // ROS Msgs
 #include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Vector3.h>
 #include <std_msgs/Float32.h>
 
 // Includes
@@ -50,8 +54,8 @@
 #include <gazebo/common/common.hh>
 
 // PhysicsModel Simulation
-#define MODEL_NAME BlankModel
-#include <blank_model.hh>
+#define MODEL_NAME DronePhysicsModel
+#include <drone_model.hh>
 
 namespace gazebo
 {
@@ -70,6 +74,8 @@ namespace gazebo
 
     private:
         MODEL_NAME vehicle_model;
+
+        void BroadcastTF(Eigen::VectorXd &_position, common::Time _cur_time, string _parent, string _child);
 
         void Update();
 

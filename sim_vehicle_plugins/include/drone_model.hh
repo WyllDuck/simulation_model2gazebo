@@ -44,7 +44,7 @@ using namespace std;
 struct Parameters {
 
     // Parameters
-    double mass, L;
+    double mass, lf, lr, s;
 
     Eigen::Vector3d gravity;
 
@@ -52,19 +52,39 @@ struct Parameters {
 
     double k, b;
 
+    inline double checkValidity (YAML::Node &_config, string _key){
+        if (_config[_key]) {
+            return _config[_key].as<double>();
+        } else {
+            ROS_ERROR("ModelToGazebo (Drone Model): Check in 'sim_vehicle' the /conf folder or the params filled called in the URDF (in /urdf forlder). Missing Parameter: %s", _key.c_str());
+        }
+        return 0;
+    }
+
     // Print Parameters
     void Print(){
 
         cout << "**********************" << endl;
         cout << "Parameters:\n\n";
 
-        cout << "\tmass: " << mass << endl;
-        cout << "\tL: " << L << endl;
-        cout << "\tk: " << k << endl;
-        cout << "\tb: " << b << endl;
-        cout << "\tgravity:\n" << gravity << endl;
-        cout << "\tI:\n" << I << endl;
-        cout << "\tkd:\n" << kd << endl;
+        cout << "gravity:\n" << gravity << endl;
+
+        cout << "--- dimensions ---" << endl;
+
+        cout << "lf: " << lf << endl;
+        cout << "lr: " << lr << endl;
+        cout << "s: " << s << endl;
+
+        cout << "--- propellers ---" << endl;
+
+        cout << "k: " << k << endl;
+        cout << "b: " << b << endl;
+
+        cout << "--- body ---" << endl;
+
+        cout << "I:\n" << I << endl;
+        cout << "mass: " << mass << endl;
+        cout << "kd:\n" << kd << endl;
 
         cout << "**********************" << endl;
     }

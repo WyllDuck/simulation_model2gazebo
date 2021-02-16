@@ -39,4 +39,7 @@ inertial:
 
 gravity: 9.81 # Graviti Force       [m/s^2]
 mass: 10 # Mass Vehicle             [kg]
-L: 1.53 # Vehicle Length            [m]
+
+lf: 1.53 # Distance COG-Front       [m]
+lr: 1.53 # Distance COG-Rear        [m]
+s: 1.53 # Distance COG-Side         [m]

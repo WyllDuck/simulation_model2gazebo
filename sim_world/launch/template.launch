@@ -10,7 +10,7 @@
 	<!-- Vehicle pose -->
 	<arg default="0" name="x" />
 	<arg default="0" name="y" />
-	<arg default="0.1" name="z" />
+	<arg default="0.075" name="z" />
 	<arg default="0.0" name="roll" />
 	<arg default="0.0" name="pitch" />
 	<arg default="0.0" name="yaw" />
@@ -19,14 +19,14 @@
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
 		<arg name="world_name" value="$(find sim_world)/worlds/template.world" />
 		<arg name="debug" value="false" />
-		<arg name="gui" value="true" />
+		<arg name="gui" value="false" />
 		<arg name="paused" value="false" />
 		<arg name="use_sim_time" value="true" />
 		<arg name="headless" value="false" />
 	</include>
 
 	<!-- Configuration File (Parameters Model) -->
-    <arg name="params" default="$(find sim_vehicle)/conf/params_blank.yaml"/>
+    <arg name="params" default="$(find sim_vehicle)/conf/params_drone.yaml"/>
 
 	<!-- Load the URDF into the ROS Parameter Server -->
 	<param name="robot_description"

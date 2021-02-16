@@ -41,7 +41,8 @@ DronePhysicsModel::~DronePhysicsModel()
         LOAD & INIT
 ------------------------ */
 
-void DronePhysicsModel::LoadParameters (){
+void DronePhysicsModel::LoadParameters()
+{
 
     // Load Parameters From Model
     gazebo::physics::InertialPtr inertial = this->model->GetLink("base_link")->GetInertial();
@@ -64,9 +65,12 @@ void DronePhysicsModel::LoadParameters (){
     // Load Parameters From YAML
     // Get YAML File Direction
     string yaml_config;
-    if (this->sdf->HasElement("yaml_config")) {
+    if (this->sdf->HasElement("yaml_config"))
+    {
         yaml_config = this->sdf->Get<string>("yaml_config");
-    } else {
+    }
+    else
+    {
         ROS_ERROR("Model2Gazebo: 'yaml_config' parameter does not exist, check launch file.");
         return;
     }
@@ -74,19 +78,29 @@ void DronePhysicsModel::LoadParameters (){
     // Open YAML File
     ROS_INFO("Model2Gazebo: Loading parameters from %s", yaml_config.c_str());
     YAML::Node config = YAML::LoadFile(yaml_config);
-    
+
     // Set Parameters Values
     params.gravity.setZero();
-    params.gravity[2] = - config["gravity"].as<double>(); // SIGN CHANGE
+    params.gravity[2] = -params.checkValidity(config, "gravity"); // SIGN CHANGE
 
-    params.L = config["L"].as<double>();
-    params.k = config["k"].as<double>();
-    params.b = config["b"].as<double>();
+    params.lf = params.checkValidity(config, "lf");
+    params.lr = params.checkValidity(config, "lr");
+    params.s = params.checkValidity(config, "s");
+
+    params.k = params.checkValidity(config, "k");
+    params.b = params.checkValidity(config, "b");
 
     params.kd.setZero();
-    params.kd(0, 0) = config["kd"]["xx"].as<double>();
-    params.kd(1, 1) = config["kd"]["yy"].as<double>();
-    params.kd(2, 2) = config["kd"]["zz"].as<double>();
+    if (config["kd"])
+    {
+        params.kd(0, 0) = config["kd"]["xx"].as<double>();
+        params.kd(1, 1) = config["kd"]["yy"].as<double>();
+        params.kd(2, 2) = config["kd"]["zz"].as<double>();
+    }
+    else
+    {
+        ROS_ERROR("ModelToGazebo (Drone Model): Check in 'sim_vehicle' the /conf folder or the params filled called in the URDF (in /urdf forlder). Missing Parameter: kd");
+    }
 
     // Finished Notification
     ROS_INFO("Model2Gazebo: Parameters loaded successfully.");
@@ -98,14 +112,14 @@ void DronePhysicsModel::Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr
     // Save Model
     this->model = _parent;
     this->sdf = _sdf;
-    
+
     // Current State Vectors
     this->cur_ace.resize(6);
     this->cur_ace.setZero();
 
     this->cur_vel.resize(6);
     this->cur_vel.setZero();
-    
+
     this->cur_pos.resize(6);
     this->cur_pos.setZero();
 
@@ -143,27 +157,19 @@ void DronePhysicsModel::GetTransformtionMatrices()
         -s1, c1 * s2, c1 * c2;
 
     R_Local2Global = R_Global2Local.inverse();
-    
 }
 
 void DronePhysicsModel::Run(VectorXd &_inputs, Vector3d &force_, Vector3d &torque_)
 {
 
-    // Compute linear and angular accelerations.
-    /*
-    Vector3d a, omegadot;
-    Acceleration(_inputs, a);
-    AngularAcceleration(_inputs, omegadot);
-    */
-
     // Append values for model2gazebo - Reference Frame GLOBAL
-    force_[0] = (_inputs[6] - _inputs[8])   * 10;
-    force_[1] = (_inputs[9] - _inputs[7])   * 10;
-    force_[2] = (_inputs[11] - _inputs[10]) * 10;
+    force_[0] = (_inputs[0]);
+    force_[1] = (_inputs[1]);
+    force_[2] = (_inputs[2]);
 
-    torque_[0] = (_inputs[5] - _inputs[4])  * 10;
-    torque_[1] = (_inputs[0] - _inputs[1])  * 10;
-    torque_[2] = (_inputs[2] - _inputs[3])  * 10;
+    torque_[0] = (_inputs[3]);
+    torque_[1] = (_inputs[4]);
+    torque_[2] = (_inputs[5]);
 }
 
 /* ------------------------
@@ -182,9 +188,9 @@ void DronePhysicsModel::Thrust(VectorXd &_inputs, Vector3d &T_)
 // Compute torques, given current inputs, length, drag coefficient, and thrust coefficient.
 void DronePhysicsModel::Torques(VectorXd &_inputs, Vector3d &tau_)
 {
-    tau_ << params.L * params.k * (_inputs[0] - _inputs[2]),
-            params.L * params.k * (_inputs[1] - _inputs[3]),
-            params.b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
+    tau_ << params.lf * params.k * (_inputs[0] - _inputs[2]),
+        params.lf * params.k * (_inputs[1] - _inputs[3]),
+        params.b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
 }
 
 // Compute acceleration in the global reference frame

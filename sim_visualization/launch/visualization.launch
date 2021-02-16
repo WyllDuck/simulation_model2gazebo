@@ -1,0 +1,6 @@
+<launch>
+
+    <!-- launch rviz config file -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sim_visualization)/rviz/rviz_visualization.rviz" />
+
+</launch>
