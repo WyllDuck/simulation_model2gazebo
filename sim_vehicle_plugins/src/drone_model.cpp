@@ -159,60 +159,54 @@ void DronePhysicsModel::GetTransformtionMatrices()
     R_Local2Global = R_Global2Local.inverse();
 }
 
-void DronePhysicsModel::Run(VectorXd &_inputs, Vector3d &force_, Vector3d &torque_)
+void DronePhysicsModel::Run(const VectorXd &_all_inputs, Vector3d &force_, Vector3d &torque_)
 {
+    // Only 4 motors
+    VectorXd _inputs;
+    _inputs.resize(4);
+
+    // TODO: Check input upper limit  
+    _inputs[0] = _all_inputs[0];
+    _inputs[1] = _all_inputs[1];
+    _inputs[2] = _all_inputs[2];
+    _inputs[3] = _all_inputs[3];
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    force_[0] = (_inputs[0]);
-    force_[1] = (_inputs[1]);
-    force_[2] = (_inputs[2]);
-
-    torque_[0] = (_inputs[3]);
-    torque_[1] = (_inputs[4]);
-    torque_[2] = (_inputs[5]);
+    GetForces(_inputs, force_);
+    GetTorques(_inputs, torque_);
 }
 
 /* ------------------------
     AUXILIARY FUNCTIONS
 ------------------------ */
-// NOTE: Inputs (_inputs) are values for ωi
+// NOTE: Inputs (_inputs) are values for ωi² | Squared Values!
 
 // Compute thrust given current inputs and thrust coefficient.
-void DronePhysicsModel::Thrust(VectorXd &_inputs, Vector3d &T_)
+void DronePhysicsModel::GetThrust(const VectorXd &_inputs, Vector3d &Tr_)
 {
-    T_ << 0,
+    Tr_ << 0,
         0,
         params.k * _inputs.sum();
 }
 
 // Compute torques, given current inputs, length, drag coefficient, and thrust coefficient.
-void DronePhysicsModel::Torques(VectorXd &_inputs, Vector3d &tau_)
+void DronePhysicsModel::GetTorques(const VectorXd &_inputs, Vector3d &T_)
 {
-    tau_ << params.lf * params.k * (_inputs[0] - _inputs[2]),
-        params.lf * params.k * (_inputs[1] - _inputs[3]),
+    T_ << params.lr * params.k * (_inputs[1] + _inputs[2]) - params.lf * params.k * (_inputs[0] + _inputs[3]),
+        params.s * params.k * (- _inputs[0] - _inputs[1] + _inputs[2] + _inputs[3]),
         params.b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
 }
 
 // Compute acceleration in the global reference frame
-void DronePhysicsModel::Acceleration(VectorXd &_inputs, Vector3d &a_)
+void DronePhysicsModel::GetForces(const VectorXd &_inputs, Vector3d &F_)
 {
-    Vector3d T;
-    Thrust(_inputs, T);
+    Vector3d Tr;
+    Tr.resize(3);
+
+    GetThrust(_inputs, Tr);
 
     Vector3d vel(cur_vel[0], cur_vel[1], cur_vel[2]);
-    Vector3d Fd = -params.kd * vel;
+    Vector3d Fd = - params.kd * vel;
 
-    a_ = R_Local2Global / params.mass * (T + Fd) + params.gravity;
-}
-
-// Compute angular acceleration in the global reference frame
-void DronePhysicsModel::AngularAcceleration(VectorXd &_inputs, Vector3d &omegadot_)
-{
-    Vector3d tau;
-    Torques(_inputs, tau);
-
-    Vector3d omega(cur_vel[3], cur_vel[4], cur_vel[5]);
-    omegadot_ = params.I.inverse() * (tau - (omega.cross(params.I * omega)));
-
-    omegadot_ = R_Local2Global * omegadot_;
+    F_ = R_Local2Global * Tr + Fd + params.gravity;
 }

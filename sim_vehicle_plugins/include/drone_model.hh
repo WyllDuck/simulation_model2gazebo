@@ -98,7 +98,7 @@ public:
 
     ~DronePhysicsModel();
 
-    void Run(Eigen::VectorXd &_inputs, Eigen::Vector3d &force_, Eigen::Vector3d &torque_);
+    void Run(const Eigen::VectorXd &_all_inputs, Eigen::Vector3d &force_, Eigen::Vector3d &torque_);
 
     void Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &nh);
 
@@ -122,13 +122,11 @@ public:
 
 private:
 
-    void Thrust(Eigen::VectorXd &_inputs, Eigen::Vector3d &T_);
+    void GetThrust(const Eigen::VectorXd &_inputs, Eigen::Vector3d &Tr_);
 
-    void Torques(Eigen::VectorXd &_inputs, Eigen::Vector3d &tau_);
+    void GetTorques(const Eigen::VectorXd &_inputs, Eigen::Vector3d &T_);
 
-    void Acceleration(Eigen::VectorXd &_inputs, Eigen::Vector3d &a_);
-
-    void AngularAcceleration(Eigen::VectorXd &_inputs, Eigen::Vector3d &omegadot_);
+    void GetForces(const Eigen::VectorXd &_inputs, Eigen::Vector3d &F_);
 };
 
 #endif // DRONE_HH
