@@ -6,7 +6,7 @@
     <include file="$(find drone)/launch/all_in.launch"></include>
 
     <!-- SIMULATION -->
-    <include file="$(find sim_world)/launch/template.launch"></include>
+    <include file="$(find sim_world)/launch/template_basic.launch"></include>
     <include file="$(find sim_visualization)/launch/visualization.launch"></include>
 
     <!-- CONTROLLER -->
