@@ -152,15 +152,27 @@ void DronePhysicsModel::GetTransformtionMatrices()
     double s1 = sin(cur_pos[4]);
     double s2 = sin(cur_pos[5]);
 
-    R_Global2Local << c0 * c1, c0 * s1 * s2 - s0 * c2, c0 * s1 * s2 + s0 * s2,
-        s0 * c1, s0 * s1 * s2 + c0 * c2, s0 * s1 * c2 - c0 * s2,
-        -s1, c1 * s2, c1 * c2;
+    Rx  <<  1,  0,  0,
+            0, c0, -s0,
+            0, s0, c0;
 
+    Ry  <<  c1, 0, -s1,
+            0,  1,   0,
+            -s1, 0, c1;
+    
+    Rz  <<  c2, -s2, 0,
+            s2, -c2, 0,
+            0,  0,  1;
+
+    R_Global2Local = Rx * Ry * Rz;
     R_Local2Global = R_Global2Local.inverse();
 }
 
 void DronePhysicsModel::Run(const VectorXd &_all_inputs, Vector3d &force_, Vector3d &torque_)
 {
+    // Update Transformation Matrixes (Global2Local & Local2Global)
+    GetTransformtionMatrices();
+    
     // Only 4 motors
     VectorXd _inputs;
     _inputs.resize(4);

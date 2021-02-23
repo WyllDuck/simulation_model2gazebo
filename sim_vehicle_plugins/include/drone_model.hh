@@ -115,6 +115,7 @@ public:
     Eigen::VectorXd cur_pos, cur_ace, cur_vel;
 
     Eigen::Matrix3d R_Global2Local, R_Local2Global;
+    Eigen::Matrix3d Rx, Ry, Rz; // Used during Global2Local matrix calculation
 
     boost::shared_ptr<ros::NodeHandle> nh;
 

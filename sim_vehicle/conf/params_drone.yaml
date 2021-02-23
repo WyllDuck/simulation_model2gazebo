@@ -19,27 +19,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-k: 1 # Thrust Propellers
-b: 1 # Torque Propellers
+k: 31.3e-5 # Thrust Propellers [Nms²]
+b: 7.5e-7  # Torque Propellers [Nms²]
 
 # Aerodynamic Friction Matrix
 kd:
-    xx: 1
-    yy: 1
-    zz: 1
+    xx: 0.01
+    yy: 0.01
+    zz: 0.01
 
 # Inertial Matrix
 inertial:
-    xx: 1
+    xx: 0.01969
     xy: 0
     xz: 0  
-    yy: 1
+    yy: 0.01961
     yz: 0
-    zz: 1
+    zz: 0.03938
 
 gravity: 9.81 # Graviti Force       [m/s^2]
-mass: 10 # Mass Vehicle             [kg]
+mass: 0.250   # Mass Vehicle           [kg]
 
-lf: 1.53 # Distance COG-Front       [m]
-lr: 1.53 # Distance COG-Rear        [m]
-s: 1.53 # Distance COG-Side         [m]
+lf: 0.17677 # Distance COG-Front       [m]
+lr: 0.17677 # Distance COG-Rear        [m]
+s: 0.17677  # Distance COG-Side        [m]
