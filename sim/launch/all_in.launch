@@ -1,5 +1,11 @@
 <launch>
 
+    <!-- DRONE SW -->
+    <!-- NOTE:  If you don't have access to this github/folder, it is normal I put it in private. 
+                Just comment or remove this line and devellop your own software, sorry bro. -->
+    <include file="$(find drone)/launch/all_in.launch"></include>
+
+    <!-- SIMULATION -->
     <include file="$(find sim_world)/launch/template.launch"></include>
     <include file="$(find sim_visualization)/launch/visualization.launch"></include>
 
@@ -9,7 +15,9 @@
     </node> 
     -->
 
+    <!-- 
     <node pkg="sim" type="ps_control.py" name="ps_control" output="screen">
     </node>
-
+    -->
+    
 </launch>

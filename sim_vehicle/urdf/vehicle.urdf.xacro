@@ -4,8 +4,6 @@
     <!-- CONFIGURATION FILE (YAML) -->
     <xacro:property name="params" value="${load_yaml('$(arg params)')}"/>
 
-    <!-- IMPORTS -->
-    <xacro:include filename="$(find sim_vehicle)/sensors/sensors.urdf.xacro" />
 
     <!-- ***************** -->
     <!--  VEHICLE PHYSICS  -->
@@ -50,5 +48,7 @@
     <!-- *************** -->
     <!--  MAIN SENSORS   -->
     <!-- *************** -->
+
+    <xacro:include filename="$(find sim_vehicle)/sensors/sensors.urdf.xacro"/>
 
 </robot>
