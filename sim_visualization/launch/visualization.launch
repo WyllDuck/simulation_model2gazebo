@@ -3,4 +3,8 @@
     <!-- launch rviz config file -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sim_visualization)/rviz/rviz_visualization.rviz" />
 
+    <!-- launch rqt config file -->
+    <node name="rqt_visualization_dv" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" 
+    args = "--perspective-file $(find sim_visualization)/rqt/imu.perspective"/>
+
 </launch>
