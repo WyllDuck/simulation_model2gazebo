@@ -17,9 +17,9 @@ class Trace {
         ros::NodeHandle nh;
 
         size_t pos = 0; // position matrix storage
-        unsigned int N = 100; // length trace
+        unsigned int N = 5000; // length trace
         
-        unsigned int f = 10; // sampling frequency
+        unsigned int f = 1; // sampling frequency
         unsigned int n = 0;  // current sample
 
         Eigen::MatrixXd values = Eigen::MatrixXd(N, 3);
