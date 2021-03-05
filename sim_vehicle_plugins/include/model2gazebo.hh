@@ -86,15 +86,17 @@ namespace gazebo
 
         void PublishStateTruth();
 
-        Eigen::VectorXd gaz_ace, gaz_vel, gaz_pos;
+        Eigen::VectorXd gaz_ace, gaz_vel_global, gaz_vel_local, gaz_pos;
         Eigen::Vector3d force, torque;
 
         ros::Publisher pub_state_truth_lin_ace;
-        ros::Publisher pub_state_truth_lin_vel;
+        ros::Publisher pub_state_truth_lin_vel_global;
+        ros::Publisher pub_state_truth_lin_vel_local;
         ros::Publisher pub_state_truth_lin_pos;
 
         ros::Publisher pub_state_truth_ang_ace;
-        ros::Publisher pub_state_truth_ang_vel;
+        ros::Publisher pub_state_truth_lin_ang_global;
+        ros::Publisher pub_state_truth_lin_ang_local;
         ros::Publisher pub_state_truth_ang_pos;
 
         boost::shared_ptr<ros::NodeHandle> nh;

@@ -73,6 +73,11 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -146,7 +151,7 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 0.11832302808761597
       Target Frame: base_link
-      Yaw: 0
+      Yaw: 3.1415998935699463
     Saved: ~
 Window Geometry:
   Displays:

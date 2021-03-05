@@ -153,16 +153,16 @@ void DronePhysicsModel::GetTransformtionMatrices()
     double s2 = sin(cur_pos[5]);
 
     Rx  <<  1,  0,  0,
-            0, c0, -s0,
-            0, s0, c0;
+            0, c0, s0,
+            0,-s0, c0;
 
-    Ry  <<  c1, 0, -s1,
+    Ry  <<  c1, 0,  s1,
             0,  1,   0,
             -s1, 0, c1;
     
-    Rz  <<  c2, -s2, 0,
-            s2, -c2, 0,
-            0,  0,  1;
+    Rz  <<  c2,  s2, 0,
+            -s2, c2, 0,
+            0,   0,  1;
 
     R_Global2Local = Rx * Ry * Rz;
     R_Local2Global = R_Global2Local.inverse();
@@ -207,6 +207,8 @@ void DronePhysicsModel::GetTorques(const VectorXd &_inputs, Vector3d &T_)
     T_ << params.lr * params.k * (_inputs[1] + _inputs[2]) - params.lf * params.k * (_inputs[0] + _inputs[3]),
         params.s * params.k * (- _inputs[0] - _inputs[1] + _inputs[2] + _inputs[3]),
         params.b * (_inputs[0] - _inputs[1] + _inputs[2] - _inputs[3]);
+
+    T_ = R_Local2Global * T_;
 }
 
 // Compute acceleration in the global reference frame

@@ -17,7 +17,6 @@
             <geometry>
                 <box size="${camera_link} ${camera_link} ${camera_link}" />
             </geometry>
-            <material name="red" />
         </visual>
 
         <inertial>

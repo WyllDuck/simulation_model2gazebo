@@ -37,8 +37,11 @@ ModelToGazebo::ModelToGazebo() : ModelPlugin()
     gaz_ace.resize(6);
     gaz_ace.setZero();
     
-    gaz_vel.resize(6);
-    gaz_vel.setZero();
+    gaz_vel_global.resize(6);
+    gaz_vel_global.setZero();
+
+    gaz_vel_local.resize(6);
+    gaz_vel_local.setZero();
     
     gaz_pos.resize(6);
     gaz_pos.setZero();
@@ -111,11 +114,13 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
     // State Truth Publishers
     this->pub_state_truth_lin_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/acceleration", 1000);
-    this->pub_state_truth_lin_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/velocity", 1000);
+    this->pub_state_truth_lin_vel_global = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/velocity", 1000);
+    this->pub_state_truth_lin_vel_local = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/local/linear/velocity", 1000);
     this->pub_state_truth_lin_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/linear/position", 1000);
 
     this->pub_state_truth_ang_ace = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/acceleration", 1000);
-    this->pub_state_truth_ang_vel = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/velocity", 1000);
+    this->pub_state_truth_lin_ang_global = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/velocity", 1000);
+    this->pub_state_truth_lin_ang_local = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/local/angular/velocity", 1000);
     this->pub_state_truth_ang_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/position", 1000);
 
 }
@@ -139,7 +144,7 @@ void ModelToGazebo::Update()
     PublishStateTruth();
 
     // Load new state in PhysicsModel attributes.
-    vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel, gaz_pos);
+    vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel_global, gaz_pos);
 
     // Find Next State
     vehicle_model.Run(inputs, force, torque);
@@ -192,19 +197,25 @@ void ModelToGazebo::PublishStateTruth()
 {
 
     geometry_msgs::Vector3Stamped msg_lin_ace = geometry_msgs::Vector3Stamped();
-    geometry_msgs::Vector3Stamped msg_lin_vel = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_lin_vel_global = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_lin_vel_local = geometry_msgs::Vector3Stamped();
     geometry_msgs::Vector3Stamped msg_lin_pos = geometry_msgs::Vector3Stamped();
 
     geometry_msgs::Vector3Stamped msg_ang_ace = geometry_msgs::Vector3Stamped();
-    geometry_msgs::Vector3Stamped msg_ang_vel = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_ang_vel_global = geometry_msgs::Vector3Stamped();
+    geometry_msgs::Vector3Stamped msg_ang_vel_local = geometry_msgs::Vector3Stamped();
     geometry_msgs::Vector3Stamped msg_ang_pos = geometry_msgs::Vector3Stamped();
 
     // Header
-    msg_lin_ace.header.stamp = msg_lin_vel.header.stamp = msg_lin_pos.header.stamp = ros::Time::now();
-    msg_lin_ace.header.frame_id = msg_lin_vel.header.frame_id = msg_lin_pos.header.frame_id = "global";
+    msg_lin_ace.header.stamp = msg_lin_vel_global.header.stamp = msg_lin_pos.header.stamp = ros::Time::now();
+    msg_lin_ace.header.frame_id = msg_lin_vel_global.header.frame_id = msg_lin_pos.header.frame_id = "map";
+    msg_lin_vel_local.header.stamp = ros::Time::now();
+    msg_lin_vel_local.header.frame_id = "base_link";
 
-    msg_ang_ace.header.stamp = msg_ang_vel.header.stamp = msg_ang_pos.header.stamp = ros::Time::now();
-    msg_ang_ace.header.frame_id = msg_ang_vel.header.frame_id = msg_ang_pos.header.frame_id = "global";
+    msg_ang_ace.header.stamp = msg_ang_vel_global.header.stamp = msg_ang_pos.header.stamp = ros::Time::now();
+    msg_ang_ace.header.frame_id = msg_ang_vel_global.header.frame_id = msg_ang_pos.header.frame_id = "map";
+    msg_ang_vel_local.header.stamp = ros::Time::now();
+    msg_ang_vel_local.header.frame_id = "base_link";
 
     /* -------------------- */
     // Acceleration Linear
@@ -212,10 +223,15 @@ void ModelToGazebo::PublishStateTruth()
     msg_lin_ace.vector.y = gaz_ace[1];
     msg_lin_ace.vector.z = gaz_ace[2];
 
-    // Velocity Linear
-    msg_lin_vel.vector.x = gaz_vel[0];
-    msg_lin_vel.vector.y = gaz_vel[1];
-    msg_lin_vel.vector.z = gaz_vel[2];
+    // Velocity Linear Global
+    msg_lin_vel_global.vector.x = gaz_vel_global[0];
+    msg_lin_vel_global.vector.y = gaz_vel_global[1];
+    msg_lin_vel_global.vector.z = gaz_vel_global[2];
+
+    // Velocity Linear Local
+    msg_lin_vel_local.vector.x = gaz_vel_local[0];
+    msg_lin_vel_local.vector.y = gaz_vel_local[1];
+    msg_lin_vel_local.vector.z = gaz_vel_local[2];
 
     // Position Linear
     msg_lin_pos.vector.x = gaz_pos[0];
@@ -228,10 +244,15 @@ void ModelToGazebo::PublishStateTruth()
     msg_ang_ace.vector.y = gaz_ace[4];
     msg_ang_ace.vector.z = gaz_ace[5];
 
-    // Velocity Angular
-    msg_ang_vel.vector.x = gaz_vel[3];
-    msg_ang_vel.vector.y = gaz_vel[4];
-    msg_ang_vel.vector.z = gaz_vel[5];
+    // Velocity Angular Global
+    msg_ang_vel_global.vector.x = gaz_vel_global[3];
+    msg_ang_vel_global.vector.y = gaz_vel_global[4];
+    msg_ang_vel_global.vector.z = gaz_vel_global[5];
+
+    // Velocity Angular Local
+    msg_ang_vel_local.vector.x = gaz_vel_local[3];
+    msg_ang_vel_local.vector.y = gaz_vel_local[4];
+    msg_ang_vel_local.vector.z = gaz_vel_local[5];
 
     // Position Angular
     msg_ang_pos.vector.x = gaz_pos[3];
@@ -241,11 +262,13 @@ void ModelToGazebo::PublishStateTruth()
     /* -------------------- */
     // Publish
     pub_state_truth_lin_ace.publish(msg_lin_ace);
-    pub_state_truth_lin_vel.publish(msg_lin_vel);
+    pub_state_truth_lin_vel_global.publish(msg_lin_vel_global);
+    pub_state_truth_lin_vel_local.publish(msg_lin_vel_local);
     pub_state_truth_lin_pos.publish(msg_lin_pos);
 
     pub_state_truth_ang_ace.publish(msg_ang_ace);
-    pub_state_truth_ang_vel.publish(msg_ang_vel);
+    pub_state_truth_lin_ang_global.publish(msg_ang_vel_global);
+    pub_state_truth_lin_ang_local.publish(msg_ang_vel_local);
     pub_state_truth_ang_pos.publish(msg_ang_pos);
 }
 
@@ -257,8 +280,8 @@ void ModelToGazebo::SetState()
 {
     
     // Apply Force
-    this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
-    this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
+    this->base_link->SetForce(math::Vector3d(-force[0], -force[1], force[2]));
+    this->base_link->SetTorque(math::Vector3d(-torque[0], -torque[1], torque[2]));
 }
 
 void ModelToGazebo::GetState()
@@ -268,16 +291,16 @@ void ModelToGazebo::GetState()
     math::Pose3d pos_gaz = this->base_link->WorldCoGPose();
 
     // Velocity
-    /* Reference Frame LOCAL
-    math::Vector3d lin_vel_gaz = this->base_link->RelativeLinearVel();
-    math::Vector3d ang_vel_gaz = this->base_link->RelativeAngularVel();
-    */
-    /* Reference Frame GLOBAL*/
-    math::Vector3d lin_vel_gaz = this->base_link->WorldLinearVel();
-    math::Vector3d ang_vel_gaz = this->base_link->WorldAngularVel();
+    //Reference Frame LOCAL
+    math::Vector3d lin_vel_gaz_local = this->base_link->RelativeLinearVel();
+    math::Vector3d ang_vel_gaz_local = this->base_link->RelativeAngularVel();
+
+    // Reference Frame GLOBAL
+    math::Vector3d lin_vel_gaz_global = this->base_link->WorldLinearVel();
+    math::Vector3d ang_vel_gaz_global = this->base_link->WorldAngularVel();
 
     // Acceleration
-    /* Reference Frame GLOBAL*/
+    // Reference Frame GLOBAL
     math::Vector3d lin_accel_gaz = this->base_link->WorldLinearAccel();
     math::Vector3d ang_accel_gaz = this->base_link->WorldAngularAccel();
 
@@ -285,24 +308,36 @@ void ModelToGazebo::GetState()
         Append Information 
     ---------------------------------- */
     // Position Linear
-    gaz_pos[0] = pos_gaz.Pos()[0];
-    gaz_pos[1] = pos_gaz.Pos()[1];
+    gaz_pos[0] = - pos_gaz.Pos()[0];
+    gaz_pos[1] = - pos_gaz.Pos()[1];
     gaz_pos[2] = pos_gaz.Pos()[2];
 
     // Position Angular
-    gaz_pos[3] = pos_gaz.Rot().Roll();
-    gaz_pos[4] = pos_gaz.Rot().Pitch();
+    gaz_pos[3] = - pos_gaz.Rot().Roll();
+    gaz_pos[4] = - pos_gaz.Rot().Pitch();
     gaz_pos[5] = pos_gaz.Rot().Yaw();
 
+    /* Global */
     // Velocity Linear
-    gaz_vel[0] = lin_vel_gaz[0];
-    gaz_vel[1] = lin_vel_gaz[1];
-    gaz_vel[2] = lin_vel_gaz[2];
+    gaz_vel_global[0] = - lin_vel_gaz_global[0];
+    gaz_vel_global[1] = - lin_vel_gaz_global[1];
+    gaz_vel_global[2] = lin_vel_gaz_global[2];
 
     // Velocity Angular
-    gaz_vel[3] = ang_vel_gaz[0];
-    gaz_vel[4] = ang_vel_gaz[1];
-    gaz_vel[5] = ang_vel_gaz[2];
+    gaz_vel_global[3] = - ang_vel_gaz_global[0];
+    gaz_vel_global[4] = - ang_vel_gaz_global[1];
+    gaz_vel_global[5] = ang_vel_gaz_global[2];
+
+    /* Local */
+    // Velocity Linear
+    gaz_vel_local[0] = - lin_vel_gaz_local[0];
+    gaz_vel_local[1] = - lin_vel_gaz_local[1];
+    gaz_vel_local[2] = lin_vel_gaz_local[2];
+
+    // Velocity Angular
+    gaz_vel_local[3] = - ang_vel_gaz_local[0];
+    gaz_vel_local[4] = - ang_vel_gaz_local[1];
+    gaz_vel_local[5] = ang_vel_gaz_local[2];
 
     // NOTE: These values are taken directly from the force & torque applied by the model
     //       and the iteraction recorded by the API is added to correct collisions.
