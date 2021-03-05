@@ -1,5 +1,8 @@
 <launch>
 
+    <!-- topic generator for rviz-->
+    <node pkg="sim_visualization" type="visualization" name="visualization"></node>
+
     <!-- launch rviz config file -->
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sim_visualization)/rviz/rviz_visualization.rviz" />
 
