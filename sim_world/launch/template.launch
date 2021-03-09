@@ -4,7 +4,7 @@
 	<!-- Vehicle pose -->
 	<arg default="0" name="x" />
 	<arg default="0" name="y" />
-	<arg default="0.075" name="z" />
+	<arg default="1.075" name="z" />
 	<arg default="0.0" name="roll" />
 	<arg default="0.0" name="pitch" />
 	<arg default="0.0" name="yaw" />

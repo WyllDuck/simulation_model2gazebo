@@ -156,9 +156,10 @@ void DronePhysicsModel::GetTransformtionMatrices()
             0, c0, s0,
             0,-s0, c0;
 
-    Ry  <<  c1, 0,  s1,
+    // REVIEW: Can figure out why, but it works. debug if necessary.
+    Ry  <<  c1, 0,  -s1,
             0,  1,   0,
-            -s1, 0, c1;
+            s1, 0, c1;
     
     Rz  <<  c2,  s2, 0,
             -s2, c2, 0,

@@ -280,8 +280,8 @@ void ModelToGazebo::SetState()
 {
     
     // Apply Force
-    this->base_link->SetForce(math::Vector3d(-force[0], -force[1], force[2]));
-    this->base_link->SetTorque(math::Vector3d(-torque[0], -torque[1], torque[2]));
+    this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
+    this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
 }
 
 void ModelToGazebo::GetState()
@@ -308,35 +308,35 @@ void ModelToGazebo::GetState()
         Append Information 
     ---------------------------------- */
     // Position Linear
-    gaz_pos[0] = - pos_gaz.Pos()[0];
-    gaz_pos[1] = - pos_gaz.Pos()[1];
+    gaz_pos[0] = pos_gaz.Pos()[0];
+    gaz_pos[1] = pos_gaz.Pos()[1];
     gaz_pos[2] = pos_gaz.Pos()[2];
 
     // Position Angular
-    gaz_pos[3] = - pos_gaz.Rot().Roll();
-    gaz_pos[4] = - pos_gaz.Rot().Pitch();
+    gaz_pos[3] = pos_gaz.Rot().Roll();
+    gaz_pos[4] = pos_gaz.Rot().Pitch();
     gaz_pos[5] = pos_gaz.Rot().Yaw();
 
     /* Global */
     // Velocity Linear
-    gaz_vel_global[0] = - lin_vel_gaz_global[0];
-    gaz_vel_global[1] = - lin_vel_gaz_global[1];
+    gaz_vel_global[0] = lin_vel_gaz_global[0];
+    gaz_vel_global[1] = lin_vel_gaz_global[1];
     gaz_vel_global[2] = lin_vel_gaz_global[2];
 
     // Velocity Angular
-    gaz_vel_global[3] = - ang_vel_gaz_global[0];
-    gaz_vel_global[4] = - ang_vel_gaz_global[1];
+    gaz_vel_global[3] = ang_vel_gaz_global[0];
+    gaz_vel_global[4] = ang_vel_gaz_global[1];
     gaz_vel_global[5] = ang_vel_gaz_global[2];
 
     /* Local */
     // Velocity Linear
-    gaz_vel_local[0] = - lin_vel_gaz_local[0];
-    gaz_vel_local[1] = - lin_vel_gaz_local[1];
+    gaz_vel_local[0] = lin_vel_gaz_local[0];
+    gaz_vel_local[1] = lin_vel_gaz_local[1];
     gaz_vel_local[2] = lin_vel_gaz_local[2];
 
     // Velocity Angular
-    gaz_vel_local[3] = - ang_vel_gaz_local[0];
-    gaz_vel_local[4] = - ang_vel_gaz_local[1];
+    gaz_vel_local[3] = ang_vel_gaz_local[0];
+    gaz_vel_local[4] = ang_vel_gaz_local[1];
     gaz_vel_local[5] = ang_vel_gaz_local[2];
 
     // NOTE: These values are taken directly from the force & torque applied by the model
