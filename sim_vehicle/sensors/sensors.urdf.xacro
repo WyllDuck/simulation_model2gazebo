@@ -2,9 +2,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <!-- IMU (Inertal Motion Unit) -->
-    <xacro:include filename="$(find sim_vehicle)/sensors/imu.urdf.xacro"/>
+    <!-- <xacro:include filename="$(find sim_vehicle)/sensors/imu.urdf.xacro"/> -->
 
     <!-- Camera Front -->
-    <xacro:include filename="$(find sim_vehicle)/sensors/camera.urdf.xacro"/>
+    <!-- <xacro:include filename="$(find sim_vehicle)/sensors/camera.urdf.xacro"/> -->
 
 </robot>

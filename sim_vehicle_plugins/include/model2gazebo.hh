@@ -54,8 +54,11 @@
 #include <gazebo/common/common.hh>
 
 // PhysicsModel Simulation
-#define MODEL_NAME DronePhysicsModel
-#include <drone_model.hh>
+// #define MODEL_NAME DronePhysicsModel
+// #include <drone_model.hh>
+
+#define MODEL_NAME CarPhysicsModel
+#include <car_model.hh>
 
 namespace gazebo
 {

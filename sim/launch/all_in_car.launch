@@ -1,0 +1,18 @@
+<launch>
+
+    <!-- SIMULATION -->
+    <include file="$(find sim_world)/launch/template_basic.launch"></include>
+    <include file="$(find sim_visualization)/launch/visualization.launch"></include>
+
+    <!-- CONTROLLER -->
+    <!--
+    <node pkg="sim" type="keyboard_control.py" name="keyboard_control" output="screen">
+    </node> 
+    -->
+
+    <!-- 
+    <node pkg="sim" type="ps_control.py" name="ps_control" output="screen">
+    </node>
+    -->
+    
+</launch>
