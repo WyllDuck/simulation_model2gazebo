@@ -43,13 +43,13 @@ lf:     0.1377
 rho:    1.225 # Air Density
 
 # Electric Motor Parameter
-Cm0:    0.1305
+Cm0:    10.1305
 Cm1:    1.05294
 
 C0:     3.68918     # Resistive driveline parameter
 C1:     0.0306803   # Static friction force
  
-Cd_A:   0.657645    # Drag force parameter
+Cd_A:   -0.657645    # Drag force parameter
 
 # Neumatic Forces / Slip Angle
 Caf:    1.3958

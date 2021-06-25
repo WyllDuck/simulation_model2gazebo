@@ -21,7 +21,7 @@
         </inertial>
 
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 -1.57" />
+            <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
                 <mesh filename="package://sim_vehicle/meshes/vehicle.dae" />
             </geometry>

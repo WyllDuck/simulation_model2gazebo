@@ -153,7 +153,6 @@ void CarPhysicsModel::GetTransformtionMatrices()
             0, c0, s0,
             0,-s0, c0;
 
-    // REVIEW: Can figure out why, but it works. debug if necessary.
     Ry  <<  c1, 0,  -s1,
             0,  1,   0,
             s1, 0, c1;
@@ -170,24 +169,52 @@ void CarPhysicsModel::Run(const VectorXd &_all_inputs, Vector3d &force_, Vector3
 {
     // Update Transformation Matrixes (Global2Local & Local2Global)
     GetTransformtionMatrices();
-    
-    // Only 4 motors
-    VectorXd _inputs;
-    _inputs.resize(4);
-
-    // TODO: Check input upper limit  
-    _inputs[0] = _all_inputs[0];
-    _inputs[1] = _all_inputs[1];
-    _inputs[2] = _all_inputs[2];
-    _inputs[3] = _all_inputs[3];
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    //GetForces(_inputs, force_);
-    //GetTorques(_inputs, torque_);
+    DynamicModel(_all_inputs[0], _all_inputs[1], force_, torque_);
 }
 
 /* ------------------------
     AUXILIARY FUNCTIONS
 ------------------------ */
-// NOTE: Inputs (_inputs) are values for ωi² | Squared Values!
 
+void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, Vector3d &F_, Vector3d &T_)
+{
+    // State
+    double vx, vy, omega;
+
+    vx = cur_vel[0];
+    vy = cur_vel[1];
+    omega = cur_vel[5];
+
+    // double Ffx = 0; // No Motrice Force
+
+    // Motrice Force Direction X Wheels
+    double Frx = (params.Cm0 - params.Cm1*vx)*_accel - params.C0*vx - params.C1 - (params.Cd_A*params.rho*pow(vx,2))/2; 
+
+    // Lateral Forces
+    double Ffy = 2.0 * params.Caf * (_delta - atan((vy+params.lf*omega)/(vx + 1e-6)));
+    double Fry = - 2.0 * params.Car * atan((vy - params.lr*omega)/(vx + 1e-6));
+
+    cout << atan((vy - params.lr*omega)/(vx + 1e-6)) << endl;
+
+    F_[0] = Frx - Ffy * sin(_delta) + params.mass*vy*omega;
+    F_[1] = Fry + Ffy * cos(_delta) - params.mass*vx*omega;
+
+    cout << F_ << endl;
+    F_ = R_Local2Global * F_;
+
+    F_[2] = params.gravity[2];
+
+    cout << F_ << endl;
+    cout << "_______" << endl;
+
+    T_[0] = 0;
+    T_[1] = 0;
+    T_[2] = Ffy*params.lf*cos(_delta) - Fry*params.lr;
+
+    T_ = R_Local2Global * T_;
+    cout << T_ << endl;
+    cout << "########" << endl;
+
+}

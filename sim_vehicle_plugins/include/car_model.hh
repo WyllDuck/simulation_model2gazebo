@@ -136,6 +136,8 @@ public:
 
 private:
 
+    void DynamicModel (const double &_delta, const double &_accel, Eigen::Vector3d &F_, Eigen::Vector3d &T_);
+
 };
 
 #endif // CAR_HH

@@ -144,7 +144,7 @@ void ModelToGazebo::Update()
     PublishStateTruth();
 
     // Load new state in PhysicsModel attributes.
-    vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel_global, gaz_pos);
+    vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel_local, gaz_pos);
 
     // Find Next State
     vehicle_model.Run(inputs, force, torque);
