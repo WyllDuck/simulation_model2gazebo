@@ -96,8 +96,11 @@ void CarPhysicsModel::LoadParameters()
 
     params.Cd_A = params.checkValidity(config, "Cd_A");
 
-    params.Caf = params.checkValidity(config, "Caf");
-    params.Car = params.checkValidity(config, "Car");
+    params.Caf_low = params.checkValidity(config, "Caf_low");
+    params.Car_low = params.checkValidity(config, "Car_low");
+
+    params.Caf_high = params.checkValidity(config, "Caf_high");
+    params.Car_high = params.checkValidity(config, "Car_high");
 
     // Finished Notification
     ROS_INFO("Model2Gazebo: Parameters loaded successfully.");
@@ -171,7 +174,7 @@ void CarPhysicsModel::Run(const VectorXd &_all_inputs, Vector3d &force_, Vector3
     GetTransformtionMatrices();
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    DynamicModel(_all_inputs[0], _all_inputs[1], force_, torque_);
+    DynamicModel((_all_inputs[0] - _all_inputs[1]) * 2, (_all_inputs[2] - _all_inputs[3]) * 10, force_, torque_);
 }
 
 /* ------------------------
@@ -183,9 +186,9 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     // State
     double vx, vy, omega;
 
-    vx = cur_vel[0];
-    vy = cur_vel[1];
-    omega = cur_vel[5];
+    vx      = cur_vel[0];
+    vy      = cur_vel[1];
+    omega   = cur_vel[5];
 
     // double Ffx = 0; // No Motrice Force
 
@@ -193,28 +196,30 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     double Frx = (params.Cm0 - params.Cm1*vx)*_accel - params.C0*vx - params.C1 - (params.Cd_A*params.rho*pow(vx,2))/2; 
 
     // Lateral Forces
-    double Ffy = 2.0 * params.Caf * (_delta - atan((vy+params.lf*omega)/(vx + 1e-6)));
-    double Fry = - 2.0 * params.Car * atan((vy - params.lr*omega)/(vx + 1e-6));
+    double alpha_f = atan((vy + params.lf*omega) / abs(vx + 1e-8)) - _delta;
+    double alpha_r = atan((vy - params.lr*omega) / abs(vx + 1e-8));
 
-    cout << atan((vy - params.lr*omega)/(vx + 1e-6)) << endl;
+    double Ffy, Fry;
+
+    if (vx < 0.4){
+        Ffy =   2.0 * params.Caf_low * alpha_f;
+        Fry = - 2.0 * params.Car_low * alpha_r;
+    } else {        
+        Ffy =   2.0 * params.Caf_high * alpha_f;
+        Fry = - 2.0 * params.Car_high * alpha_r;
+    }
 
     F_[0] = Frx - Ffy * sin(_delta) + params.mass*vy*omega;
     F_[1] = Fry + Ffy * cos(_delta) - params.mass*vx*omega;
 
-    cout << F_ << endl;
     F_ = R_Local2Global * F_;
 
-    F_[2] = params.gravity[2];
-
-    cout << F_ << endl;
-    cout << "_______" << endl;
+    F_[2] = params.gravity[2] * params.mass;
 
     T_[0] = 0;
     T_[1] = 0;
     T_[2] = Ffy*params.lf*cos(_delta) - Fry*params.lr;
 
     T_ = R_Local2Global * T_;
-    cout << T_ << endl;
-    cout << "########" << endl;
 
 }

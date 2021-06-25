@@ -56,7 +56,8 @@ struct Parameters {
 
     double Cd_A;
 
-    double Caf, Car;
+    double Caf_low, Car_low;
+    double Caf_high, Car_high;
 
     inline double checkValidity (YAML::Node &_config, string _key){
         if (_config[_key]) {
@@ -83,16 +84,19 @@ struct Parameters {
 
         cout << "--- others ---" << endl;
 
-        cout << "Cm0:" << Cm0 << endl;
-        cout << "Cm1:" << Cm1 << endl;
+        cout << "Cm0: " << Cm0 << endl;
+        cout << "Cm1: " << Cm1 << endl;
         
-        cout << "C0:" << C0 << endl;
-        cout << "C1:" << C1 << endl;
+        cout << "C0: " << C0 << endl;
+        cout << "C1: " << C1 << endl;
 
-        cout << "Cd_A:" << Cd_A << endl;
+        cout << "Cd_A: " << Cd_A << endl;
         
-        cout << "Caf:" << Caf << endl;
-        cout << "Car:" << Car << endl;
+        cout << "Caf_low: " << Caf_low << endl;
+        cout << "Car_low: " << Car_low << endl;
+
+        cout << "Caf_high: " << Caf_high << endl;
+        cout << "Car_high: " << Car_high << endl;
 
         cout << "--- body ---" << endl;
 

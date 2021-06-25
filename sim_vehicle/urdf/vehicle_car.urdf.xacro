@@ -28,7 +28,7 @@
         </visual>
 
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0" />
+            <origin xyz="0 0 ${params['height'] / 2}" rpy="0 0 0" />
             <geometry>
                 <!-- <sphere radius="0.075"/> -->
                 <box size="${params['length']} ${params['width']} ${params['height']}"/>

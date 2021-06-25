@@ -21,12 +21,12 @@
 
 # Inertial Matrix
 inertial:
-    xx: 0.01969
+    xx: 1
     xy: 0
     xz: 0  
-    yy: 0.01961
+    yy: 1
     yz: 0
-    zz: 0.02
+    zz: 1.01950479
 
 gravity: 9.81 # Graviti Force       [m/s^2]
 mass: 2.424   # Mass Vehicle           [kg]
@@ -52,5 +52,8 @@ C1:     0.0306803   # Static friction force
 Cd_A:   -0.657645    # Drag force parameter
 
 # Neumatic Forces / Slip Angle
-Caf:    1.3958
-Car:    1.6775
+Caf_low:    1.3958
+Car_low:    1.6775
+
+Caf_high:   40.62927783
+Car_high:   69.55846999

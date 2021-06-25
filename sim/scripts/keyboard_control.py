@@ -12,8 +12,8 @@ class KeyboardControl:
     def __init__ (self):
 
         # Parameters
-        self.change_rate = 0.2
-        self.saturation = 10
+        self.change_rate = 0.05
+        self.saturation = 1
         
         self.key_strokes = dict()
 
