@@ -49,7 +49,7 @@ Cm1:    1.05294
 C0:     3.68918     # Resistive driveline parameter
 C1:     0.0306803   # Static friction force
  
-Cd_A:   -0.657645    # Drag force parameter
+Cd_A:   0.657645    # Drag force parameter
 
 # Neumatic Forces / Slip Angle
 Caf_low:    1.3958

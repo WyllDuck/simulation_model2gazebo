@@ -174,7 +174,7 @@ void CarPhysicsModel::Run(const VectorXd &_all_inputs, Vector3d &force_, Vector3
     GetTransformtionMatrices();
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    DynamicModel((_all_inputs[0] - _all_inputs[1]) * 2, (_all_inputs[2] - _all_inputs[3]) * 10, force_, torque_);
+    DynamicModel((_all_inputs[0] - _all_inputs[1]) * 2, (_all_inputs[2] - _all_inputs[3]) * 20, force_, torque_);
 }
 
 /* ------------------------
@@ -190,10 +190,11 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     vy      = cur_vel[1];
     omega   = cur_vel[5];
 
-    // double Ffx = 0; // No Motrice Force
+    // double Ffx = 0; // NOTE: No motrice force in the front
 
     // Motrice Force Direction X Wheels
-    double Frx = (params.Cm0 - params.Cm1*vx)*_accel - params.C0*vx - params.C1 - (params.Cd_A*params.rho*pow(vx,2))/2; 
+    double sign_vx = (vx > 0) ? 1 : ((vx < 0) ? -1 : 0);
+    double Frx = (params.Cm0 - params.Cm1*abs(vx))*_accel - sign_vx*(params.C0*abs(vx) + params.C1 + (params.Cd_A * params.rho * pow(vx,2)) / 2);
 
     // Lateral Forces
     double alpha_f = atan((vy + params.lf*omega) / abs(vx + 1e-8)) - _delta;
@@ -211,7 +212,7 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
 
     F_[0] = Frx - Ffy * sin(_delta) + params.mass*vy*omega;
     F_[1] = Fry + Ffy * cos(_delta) - params.mass*vx*omega;
-
+    
     F_ = R_Local2Global * F_;
 
     F_[2] = params.gravity[2] * params.mass;
