@@ -59,6 +59,8 @@ struct Parameters {
     double Caf_low, Car_low;
     double Caf_high, Car_high;
 
+    double max_delta;
+
     inline double checkValidity (YAML::Node &_config, string _key){
         if (_config[_key]) {
             return _config[_key].as<double>();
@@ -81,6 +83,8 @@ struct Parameters {
 
         cout << "lf: " << lf << endl;
         cout << "lr: " << lr << endl;
+
+        cout << "max_delta: " << max_delta << endl;
 
         cout << "--- others ---" << endl;
 

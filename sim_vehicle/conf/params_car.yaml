@@ -21,10 +21,10 @@
 
 # Inertial Matrix
 inertial:
-    xx: 1
+    xx: 0.3
     xy: 0
     xz: 0  
-    yy: 1
+    yy: 0.6
     yz: 0
     zz: 1.01950479
 
@@ -32,9 +32,9 @@ gravity: 9.81 # Graviti Force       [m/s^2]
 mass: 2.424   # Mass Vehicle           [kg]
 
 # Collision Gazebo
-length: 1
-width: 1
-height: 1
+length: 0.3
+width: 0.1
+height: 0.2
 
 # Geometry Wheel Base
 lr:     0.1203
@@ -55,5 +55,8 @@ Cd_A:   0.657645    # Drag force parameter
 Caf_low:    1.3958
 Car_low:    1.6775
 
-Caf_high:   40.62927783
-Car_high:   69.55846999
+Caf_high:   40.62927783e1
+Car_high:   69.55846999e1
+
+# Max Steering Angle
+max_delta: 0.349

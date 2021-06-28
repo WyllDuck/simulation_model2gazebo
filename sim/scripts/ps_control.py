@@ -31,7 +31,7 @@ class PSControl:
         for i in range(self.axes):
 
             # ROS Publisher
-            pub = rospy.Publisher("/command/{}".format(i), Float32, queue_size = 1)
+            pub = rospy.Publisher("/command/{}".format(i+1), Float32, queue_size = 1)
             self.states[i] = {"pub": pub, "state": 0}
 
 

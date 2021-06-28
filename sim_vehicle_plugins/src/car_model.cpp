@@ -81,7 +81,7 @@ void CarPhysicsModel::LoadParameters()
 
     // Set Parameters Values
     params.gravity.setZero();
-    params.gravity[2] = -params.checkValidity(config, "gravity"); // SIGN CHANGE
+    params.gravity[2] = params.checkValidity(config, "gravity"); // SIGN CHANGE
 
     params.rho = params.checkValidity(config, "rho"); // air density
 
@@ -101,6 +101,8 @@ void CarPhysicsModel::LoadParameters()
 
     params.Caf_high = params.checkValidity(config, "Caf_high");
     params.Car_high = params.checkValidity(config, "Car_high");
+
+    params.max_delta = params.checkValidity(config, "max_delta");
 
     // Finished Notification
     ROS_INFO("Model2Gazebo: Parameters loaded successfully.");
@@ -153,11 +155,11 @@ void CarPhysicsModel::GetTransformtionMatrices()
     double s2 = sin(cur_pos[5]);
 
     Rx  <<  1,  0,  0,
-            0, c0, s0,
-            0,-s0, c0;
+            0, c0,  s0,
+            0, -s0, c0;
 
-    Ry  <<  c1, 0,  -s1,
-            0,  1,   0,
+    Ry  <<  c1, 0, -s1,
+            0,  1, 0,
             s1, 0, c1;
     
     Rz  <<  c2,  s2, 0,
@@ -174,7 +176,7 @@ void CarPhysicsModel::Run(const VectorXd &_all_inputs, Vector3d &force_, Vector3
     GetTransformtionMatrices();
 
     // Append values for model2gazebo - Reference Frame GLOBAL
-    DynamicModel((_all_inputs[0] - _all_inputs[1]) * 2, (_all_inputs[2] - _all_inputs[3]) * 20, force_, torque_);
+    DynamicModel( - _all_inputs[0] * params.max_delta, - _all_inputs[5] * 20, force_, torque_);
 }
 
 /* ------------------------
@@ -200,6 +202,9 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     double alpha_f = atan((vy + params.lf*omega) / abs(vx + 1e-8)) - _delta;
     double alpha_r = atan((vy - params.lr*omega) / abs(vx + 1e-8));
 
+    cout << alpha_f << endl;
+    cout << alpha_r << endl;
+
     double Ffy, Fry;
 
     if (vx < 0.4){
@@ -215,7 +220,7 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     
     F_ = R_Local2Global * F_;
 
-    F_[2] = params.gravity[2] * params.mass;
+    F_[2] = - params.gravity[2] * params.mass;
 
     T_[0] = 0;
     T_[1] = 0;
