@@ -202,9 +202,6 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     double alpha_f = atan((vy + params.lf*omega) / abs(vx + 1e-8)) - _delta;
     double alpha_r = atan((vy - params.lr*omega) / abs(vx + 1e-8));
 
-    cout << alpha_f << endl;
-    cout << alpha_r << endl;
-
     double Ffy, Fry;
 
     if (vx < 0.4){

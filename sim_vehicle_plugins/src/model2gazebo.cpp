@@ -275,7 +275,9 @@ void ModelToGazebo::PublishStateTruth()
 /* ------------------------
     INTERACT WITH GAZEBO
 ------------------------ */
+#define FORCE_ACTUATION 1
 
+#if FORCE_ACTUATION == 1
 void ModelToGazebo::SetState()
 {
     
@@ -283,6 +285,42 @@ void ModelToGazebo::SetState()
     this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
     this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
 }
+
+#else
+void ModelToGazebo::SetState()
+{
+    
+    // Velocities
+    double vx, vy, vz;
+
+    vx = gaz_vel_global[0] + dt_required * force[0] / vehicle_model.params.mass;
+    vy = gaz_vel_global[1] + dt_required * force[1] / vehicle_model.params.mass;
+    vz = gaz_vel_global[2] + dt_required * force[2] / vehicle_model.params.mass;
+
+    const math::Vector3d vel(vx, vy, vz);
+
+    double wx, wy, wz;
+
+    wx = gaz_vel_global[3] + dt_required * torque[0] / vehicle_model.params.I(0,0);
+    wy = gaz_vel_global[4] + dt_required * torque[1] / vehicle_model.params.I(1,1);
+    wz = gaz_vel_global[5] + dt_required * torque[2] / vehicle_model.params.I(2,2);
+
+    const math::Vector3d angular(wx, wy, wz);
+
+    // Position
+    const math::Pose3d    pose( gaz_pos[0] + vx * dt_required,
+                                gaz_pos[1] + vy * dt_required,
+                                gaz_pos[2] + vz * dt_required,
+                                gaz_pos[3] + wx * dt_required,
+                                gaz_pos[4] + wy * dt_required,
+                                gaz_pos[5] + wz * dt_required);
+    
+    // Tell New State to Gazebo
+    model->SetWorldPose(pose);
+    model->SetAngularVel(angular);
+    model->SetLinearVel(vel);
+}
+#endif
 
 void ModelToGazebo::GetState()
 {
@@ -349,8 +387,8 @@ void ModelToGazebo::GetState()
 
     // Acceleration Angular
     gaz_ace[3] = torque[0] / this->vehicle_model.params.I(0,0) + ang_accel_gaz[0];
-    gaz_ace[4] = torque[1] / this->vehicle_model.params.I(1,1) + ang_accel_gaz[1];
-    gaz_ace[5] = torque[2] / this->vehicle_model.params.I(2,2) + ang_accel_gaz[2];
+    gaz_ace[4] = ang_accel_gaz[2];
+    gaz_ace[5] = torque[2] / this->vehicle_model.params.I(2,2);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(ModelToGazebo)
