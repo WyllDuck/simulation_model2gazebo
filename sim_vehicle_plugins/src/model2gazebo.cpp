@@ -26,6 +26,9 @@
 using namespace gazebo;
 using namespace ignition;
 
+#define FORCE_ACTUATION 0
+#define OPEN_LOOP 0
+
 /* ------------------------
      INIT, DEL & RESET
 ------------------------ */
@@ -123,6 +126,9 @@ void ModelToGazebo::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     this->pub_state_truth_lin_ang_local = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/local/angular/velocity", 1000);
     this->pub_state_truth_ang_pos = nh->advertise<geometry_msgs::Vector3Stamped>("/truth/global/angular/position", 1000);
 
+    // Set Initial State - OPTIONAL
+    //SetInitialState();
+
 }
 
 void ModelToGazebo::Update()
@@ -140,13 +146,19 @@ void ModelToGazebo::Update()
 
     // Tasks
     /*START*/
+    #if OPEN_LOOP == 1
     GetState();
+    #endif
+
     PublishStateTruth();
 
     // Load new state in PhysicsModel attributes.
     vehicle_model.UpdateCurrentState(gaz_ace, gaz_vel_local, gaz_pos);
 
     // Find Next State
+    force.setZero();
+    torque.setZero();
+
     vehicle_model.Run(inputs, force, torque);
 
     SetState();
@@ -275,18 +287,18 @@ void ModelToGazebo::PublishStateTruth()
 /* ------------------------
     INTERACT WITH GAZEBO
 ------------------------ */
-#define FORCE_ACTUATION 1
 
-#if FORCE_ACTUATION == 1
+#if FORCE_ACTUATION == 1 && OPEN_LOOP == 1
 void ModelToGazebo::SetState()
 {
-    
+
     // Apply Force
     this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
     this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
 }
+#endif
 
-#else
+#if FORCE_ACTUATION == 0
 void ModelToGazebo::SetState()
 {
     
@@ -305,7 +317,7 @@ void ModelToGazebo::SetState()
     wy = gaz_vel_global[4] + dt_required * torque[1] / vehicle_model.params.I(1,1);
     wz = gaz_vel_global[5] + dt_required * torque[2] / vehicle_model.params.I(2,2);
 
-    const math::Vector3d angular(wx, wy, wz);
+    const math::Vector3d ang(wx, wy, wz);
 
     // Position
     const math::Pose3d    pose( gaz_pos[0] + vx * dt_required,
@@ -316,11 +328,66 @@ void ModelToGazebo::SetState()
                                 gaz_pos[5] + wz * dt_required);
     
     // Tell New State to Gazebo
+    #if OPEN_LOOP == 1
+
+    model->SetWorldPose(pose);
+    model->SetAngularVel(ang);
+    model->SetLinearVel(vel);
+    
+    #else
+
+    // Linear Velocity  - Reference GLOBAL
+    gaz_vel_global[0] = vx;
+    gaz_vel_global[1] = vy;
+    gaz_vel_global[2] = vz;
+
+    // Angular Velocity - Reference GLOBAL
+    gaz_vel_global[3] = wx;
+    gaz_vel_global[4] = wy;
+    gaz_vel_global[5] = wz;
+
+    Eigen::Vector3d vel_eig, ang_eig;
+
+    // Linear Velocity  - Reference LOCAL    
+    vel_eig << vx, vy, vz;
+    vel_eig = vehicle_model.R_Global2Local * vel_eig;
+
+    gaz_vel_local[0] = vel_eig[0];
+    gaz_vel_local[1] = vel_eig[1];
+    gaz_vel_local[2] = vel_eig[2];
+
+    // Angular Velocity - Reference LOCAL
+    ang_eig << wx, wy, wz;
+    ang_eig = vehicle_model.R_Global2Local * ang_eig;
+
+    gaz_vel_local[3] = ang_eig[0];
+    gaz_vel_local[4] = ang_eig[1];
+    gaz_vel_local[5] = ang_eig[2];
+
+    // Global Position
+    gaz_pos[0] = pose.X();
+    gaz_pos[1] = pose.Y();
+    gaz_pos[2] = pose.Z();
+
+    gaz_pos[3] = pose.Roll();
+    gaz_pos[4] = pose.Pitch();
+    gaz_pos[5] = pose.Yaw();
+
+    #endif
+
+}
+#endif
+
+void ModelToGazebo::SetInitialState()
+{
+    const math::Pose3d pose(0, 0, 0, 0, 0, 0);
+    const math::Vector3d angular(0, 0, 0);
+    const math::Vector3d vel(0, 0, 0);
+    
     model->SetWorldPose(pose);
     model->SetAngularVel(angular);
     model->SetLinearVel(vel);
 }
-#endif
 
 void ModelToGazebo::GetState()
 {
@@ -387,8 +454,8 @@ void ModelToGazebo::GetState()
 
     // Acceleration Angular
     gaz_ace[3] = torque[0] / this->vehicle_model.params.I(0,0) + ang_accel_gaz[0];
-    gaz_ace[4] = ang_accel_gaz[2];
-    gaz_ace[5] = torque[2] / this->vehicle_model.params.I(2,2);
+    gaz_ace[4] = torque[1] / this->vehicle_model.params.I(1,1) + ang_accel_gaz[1];
+    gaz_ace[5] = torque[2] / this->vehicle_model.params.I(2,2) + ang_accel_gaz[2];
 }
 
 GZ_REGISTER_MODEL_PLUGIN(ModelToGazebo)

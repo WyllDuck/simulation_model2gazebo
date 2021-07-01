@@ -55,8 +55,8 @@ Cd_A:   0.657645    # Drag force parameter
 Caf_low:    1.3958
 Car_low:    1.6775
 
-Caf_high:   200
-Car_high:   350
+Caf_high:   40.62927783
+Car_high:   69.55846999
 
 # Max Steering Angle
 max_delta: 0.349

@@ -217,7 +217,7 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_accel, 
     
     F_ = R_Local2Global * F_;
 
-    F_[2] = - params.gravity[2] * params.mass;
+    //F_[2] -= params.gravity[2] * params.mass;
 
     T_[0] = 0;
     T_[1] = 0;

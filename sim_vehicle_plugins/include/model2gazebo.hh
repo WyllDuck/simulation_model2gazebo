@@ -89,6 +89,8 @@ namespace gazebo
 
         void PublishStateTruth();
 
+        void SetInitialState();
+
         Eigen::VectorXd gaz_ace, gaz_vel_global, gaz_vel_local, gaz_pos;
         Eigen::Vector3d force, torque;
 
