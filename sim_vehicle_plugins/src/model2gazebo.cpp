@@ -26,8 +26,8 @@
 using namespace gazebo;
 using namespace ignition;
 
-#define FORCE_ACTUATION 0
-#define OPEN_LOOP 0
+#define FORCE_ACTUATION 1
+#define OPEN_LOOP 1
 
 /* ------------------------
      INIT, DEL & RESET
