@@ -119,7 +119,7 @@ public:
 
     ~CarPhysicsModel();
 
-    void Run(const Eigen::VectorXd &_all_inputs, Eigen::Vector3d &force_, Eigen::Vector3d &torque_);
+    void Run(const Eigen::VectorXd &_all_inputs, Eigen::Vector3d &lin_, Eigen::Vector3d &ang_, double dt = -1);
 
     void Init(gazebo::physics::ModelPtr &_parent, sdf::ElementPtr &_sdf, boost::shared_ptr<ros::NodeHandle> &nh);
 
@@ -128,6 +128,8 @@ public:
     void UpdateCurrentState(const Eigen::VectorXd &_cur_ace, const Eigen::VectorXd &_cur_vel, const Eigen::VectorXd &_cur_pos);
 
     void GetTransformtionMatrices();
+
+    void SelectMode();
 
     gazebo::physics::ModelPtr model;
 
@@ -142,10 +144,14 @@ public:
 
     Parameters params;
 
+    int8_t mode = 0;
+
 private:
 
-    void DynamicModel (const double &_delta, const double &_accel, Eigen::Vector3d &F_, Eigen::Vector3d &T_);
+    void DynamicModel (const double &_delta, const double &_motor, Eigen::Vector3d &F_, Eigen::Vector3d &T_);
 
+    void KinematicModel (const double &_delta, const double &_motor, Eigen::Vector3d &V_, Eigen::Vector3d &W_, const double &dt);
+    
 };
 
 #endif // CAR_HH

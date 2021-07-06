@@ -53,6 +53,9 @@ ModelToGazebo::ModelToGazebo() : ModelPlugin()
     force.setZero();
     torque.setZero();
     
+    linear.setZero();
+    angular.setZero();
+
     // Inputs Vector
     inputs.resize(12);
     inputs.setZero();
@@ -159,7 +162,25 @@ void ModelToGazebo::Update()
     force.setZero();
     torque.setZero();
 
-    vehicle_model.Run(inputs, force, torque);
+    // Select Mode
+    this->vehicle_model.SelectMode();
+    switch (this->vehicle_model.mode) 
+    {        
+        // Apply Velocity
+        case 0:
+            vehicle_model.Run(inputs, linear, angular, dt);
+            break;
+        
+        // Apply Force
+        case 1:
+            vehicle_model.Run(inputs, force, torque);
+            break;
+            
+        // Default
+        default:
+            break;
+
+    }
 
     SetState();
     /*END*/
@@ -292,9 +313,26 @@ void ModelToGazebo::PublishStateTruth()
 void ModelToGazebo::SetState()
 {
 
-    // Apply Force
-    this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
-    this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
+    // Apply Values To Gazebo
+    switch (this->vehicle_model.mode)  {
+        
+        // Apply Velocity
+        case 0:
+            this->base_link->SetLinearVel(math::Vector3d(linear[0], linear[1], linear[2]));
+            this->base_link->SetAngularVel(math::Vector3d(angular[0], angular[1], angular[2]));
+            break;
+        
+        // Apply Force        
+        case 1:
+            this->base_link->SetForce(math::Vector3d(force[0], force[1], force[2]));
+            this->base_link->SetTorque(math::Vector3d(torque[0], torque[1], torque[2]));
+            break;
+
+        // Default
+        default:
+            ROS_ERROR("model2gazebo: No valid model selected in 'SetState'.");
+            break;
+    }
 }
 #endif
 

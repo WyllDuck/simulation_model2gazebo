@@ -93,6 +93,7 @@ namespace gazebo
 
         Eigen::VectorXd gaz_ace, gaz_vel_global, gaz_vel_local, gaz_pos;
         Eigen::Vector3d force, torque;
+        Eigen::Vector3d linear, angular;
 
         ros::Publisher pub_state_truth_lin_ace;
         ros::Publisher pub_state_truth_lin_vel_global;
