@@ -176,7 +176,7 @@ void CarPhysicsModel::SelectMode()
     int8_t previous_mode = mode;
     double v = sqrt(pow(cur_vel[0], 2) + pow(cur_vel[1], 2));
 
-    if (v > 3.0)
+    if (v > 4.0)
     {
         mode = 1;
     } 
@@ -234,7 +234,7 @@ void CarPhysicsModel::DynamicModel (const double &_delta, const double &_motor, 
     double Frx = (params.Cm0 - params.Cm1*abs(vx))*_motor - sign_vx*(params.C0*abs(vx) + params.C1 + (params.Cd_A * params.rho * pow(vx,2)) / 2);
 
     // Lateral Forces
-    double alpha_f = atan((vy + params.lf*omega) / abs(vx)) - _delta;
+    double alpha_f = _delta - atan((vy + params.lf*omega) / abs(vx));    
     double alpha_r = atan((vy - params.lr*omega) / abs(vx));
 
     double Ffy, Fry;
